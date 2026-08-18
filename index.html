@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Fee Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        /* සාමාන්‍ය තිරයේදී (Screen) බිල්පත සඟවා තැබීම */
+        @media screen {
+            #print-receipt {
+                display: none;
+            }
+        }
+
+        /* මුද්‍රණය කරන අවස්ථාවේදී (Print) අවශ්‍ය CSS */
+        @media print {
+            body * {
+                visibility: hidden; /* මුළු පිටුවම නොපෙනී යයි */
+            }
+            #print-receipt, #print-receipt * {
+                visibility: visible; /* බිල්පත පමණක් පෙනෙන ලෙස සකසයි */
+            }
+            #print-receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            /* POS Printer එකට ගැලපෙන ලෙස බිල්පතේ පළල මිලිමීටර් 80 කට සැකසීම */
+            .receipt-container {
+                width: 80mm;
+                margin: 0 auto;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">Class Fee Management System</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="container mt-5" id="main-content">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                
+                <!-- Payment Form Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white text-primary fw-bold text-center fs-5">
+                        නව ගෙවීමක් ඇතුළත් කරන්න
+                    </div>
+                    <div class="card-body">
+                        <form id="paymentForm">
+                            
+                            <div class="mb-3">
+                                <label for="studentId" class="form-label fw-bold">ශිෂ්‍ය අංකය (Student ID)</label>
+                                <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentMonth" class="form-label fw-bold">ගෙවන මාසය (Month)</label>
+                                <input type="month" class="form-control" id="paymentMonth" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="amount" class="form-label fw-bold">මුදල (Amount - Rs)</label>
+                                <input type="number" class="form-control" id="amount" placeholder="1500" required>
+                            </div>
+
+                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-3">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
+                        
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Receipt Area -->
+    <div id="print-receipt">
+        <div class="receipt-container text-center">
+            <h4 class="mb-0 fw-bold">Kelum Koonara</h4>
+            <p class="mb-0">ICT Classes - Buttala</p>
+            <p class="mb-1">Tel: 07X-XXXXXXX</p>
+            <hr style="border-top: 1px dashed black;">
+            <h5 class="fw-bold">PAYMENT RECEIPT</h5>
+            <hr style="border-top: 1px dashed black;">
+            
+            <div class="text-start ms-2">
+                <p class="mb-1"><strong>Date & Time:</strong> <span id="r-date"></span></p>
+                <p class="mb-1"><strong>Student ID :</strong> <span id="r-studentid"></span></p>
+                <p class="mb-1"><strong>Month      :</strong> <span id="r-month"></span></p>
+                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount : Rs. <span id="r-amount"></span></strong></p>
+            </div>
+            
+            <hr style="border-top: 1px dashed black;">
+            <p class="mt-2 fw-bold">Thank You!</p>
+            <p style="font-size: 10px;">System generated receipt.</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase SDK & Application Logic (JavaScript & JSON Config) -->
+    <script type="module">
+        // 1. Firebase Modules Import කිරීම
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 2. Firebase Configuration (JSON format object)
+        // **වැදගත්: ඔබගේ Firebase Project එකේ Settings වලින් ලබාගන්නා Config එක මෙතනට Paste කරන්න**
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 3. Firebase Initialize කිරීම
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 4. Form Submission Logic
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // පිටුව refresh වීම නවතයි
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = "කරුණාකර රැඳී සිටින්න...";
+            btn.disabled = true;
+
+            const studentId = document.getElementById('studentId').value;
+            const paymentMonth = document.getElementById('paymentMonth').value;
+            const amount = document.getElementById('amount').value;
+            
+            try {
+                // Firebase Firestore එකට දත්ත යැවීම
+                await addDoc(collection(db, "payments"), {
+                    student_id: studentId,
+                    month: paymentMonth,
+                    amount: Number(amount),
+                    timestamp: serverTimestamp() // දැනට පවතින වේලාව
+                });
+                
+                // සාර්ථක වූ පසු Receipt එකේ දත්ත යාවත්කාලීන කිරීම (Update DOM)
+                const dateObj = new Date();
+                const formattedDate = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString();
+                
+                document.getElementById('r-date').innerText = formattedDate;
+                document.getElementById('r-studentid').innerText = studentId.toUpperCase();
+                document.getElementById('r-month').innerText = paymentMonth;
+                document.getElementById('r-amount').innerText = amount;
+                
+                // බිල්පත මුද්‍රණය කිරීම (Browser's print dialog)
+                window.print();
+                
+                // Form එක නැවත හිස් කිරීම
+                document.getElementById('paymentForm').reset();
+                
+            } catch (error) {
+                console.error("Error saving data: ", error);
+                alert("ගෙවීම සටහන් කිරීමේදී දෝෂයක් මතු විය! අන්තර්ජාල සම්බන්ධතාවය සහ Firebase Config පරීක්ෂා කරන්න.");
+            } finally {
+                // Button එක නැවත යථා තත්ත්වයට පත් කිරීම
+                btn.innerHTML = "ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න";
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
