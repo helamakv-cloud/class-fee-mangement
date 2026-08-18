@@ -40,7 +40,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Class Fee Management System - By Kelum Koonara</span>
+            <span class="navbar-brand mb-0 h1">Class Fee Management System</span>
         </div>
     </nav>
 
@@ -65,6 +65,16 @@
                                     <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
                                     <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
                                 </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="teacherName" class="form-label fw-bold">ගුරුවරයාගේ නම (Teacher's Name)</label>
+                                <input type="text" class="form-control" id="teacherName" placeholder="උදා: නම ඇතුළත් කරන්න" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="subjectName" class="form-label fw-bold">විෂය (Subject)</label>
+                                <input type="text" class="form-control" id="subjectName" placeholder="උදා: ICT" required>
                             </div>
 
                             <div class="mb-3">
@@ -159,19 +169,18 @@
     <!-- Printable Receipt Area (මෙය පෙනෙන්නේ Print කිරීමේදී පමණි) -->
     <div id="print-receipt">
         <div class="receipt-container text-center">
-            <h4 class="mb-0 fw-bold">Kelum Koonara</h4>
-            <p class="mb-0" id="r-institute-name">ICT Classes</p>
-            <p class="mb-1">Tel: 07X-XXXXXXX</p>
-            <hr style="border-top: 1px dashed black;">
-            <h5 class="fw-bold">PAYMENT RECEIPT</h5>
+            <h4 class="mb-0 fw-bold" id="r-institute-name"></h4>
+            <p class="mb-1 fw-bold">PAYMENT RECEIPT</p>
             <hr style="border-top: 1px dashed black;">
             
             <div class="text-start ms-2">
-                <p class="mb-1"><strong>Date :</strong> <span id="r-date"></span></p>
-                <p class="mb-1"><strong>ID   :</strong> <span id="r-studentid"></span></p>
-                <p class="mb-1"><strong>Name :</strong> <span id="r-name"></span></p>
-                <p class="mb-1"><strong>Month:</strong> <span id="r-month"></span></p>
-                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount: Rs.<span id="r-amount"></span></strong></p>
+                <p class="mb-1"><strong>Date    :</strong> <span id="r-date"></span></p>
+                <p class="mb-1"><strong>ID      :</strong> <span id="r-studentid"></span></p>
+                <p class="mb-1"><strong>Name    :</strong> <span id="r-name"></span></p>
+                <p class="mb-1"><strong>Teacher :</strong> <span id="r-teacher"></span></p>
+                <p class="mb-1"><strong>Subject :</strong> <span id="r-subject"></span></p>
+                <p class="mb-1"><strong>Month   :</strong> <span id="r-month"></span></p>
+                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount : Rs.<span id="r-amount"></span></strong></p>
             </div>
             
             <hr style="border-top: 1px dashed black;">
@@ -204,6 +213,8 @@
             btn.disabled = true;
 
             const institute = document.getElementById('institute').value;
+            const teacherName = document.getElementById('teacherName').value;
+            const subjectName = document.getElementById('subjectName').value;
             const studentId = document.getElementById('studentId').value;
             const studentName = document.getElementById('studentName').value;
             const paymentMonth = document.getElementById('paymentMonth').value;
@@ -218,6 +229,8 @@
                 const paymentsRef = ref(db, 'payments');
                 await push(paymentsRef, {
                     institute: institute,
+                    teacher: teacherName,
+                    subject: subjectName,
                     student_id: studentId,
                     student_name: studentName,
                     month: paymentMonth,
@@ -232,6 +245,8 @@
                 document.getElementById('r-date').innerText = dateString + " " + timeString;
                 document.getElementById('r-studentid').innerText = studentId.toUpperCase();
                 document.getElementById('r-name').innerText = studentName;
+                document.getElementById('r-teacher').innerText = teacherName;
+                document.getElementById('r-subject').innerText = subjectName;
                 document.getElementById('r-month').innerText = paymentMonth;
                 document.getElementById('r-amount').innerText = amount.toFixed(2);
                 
