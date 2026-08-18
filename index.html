@@ -8,7 +8,7 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
+    <!-- Custom CSS (Screen and Print styles) -->
     <style>
         /* සාමාන්‍ය තිරයේදී (Screen) බිල්පත සඟවා තැබීම */
         @media screen {
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Printable Receipt Area -->
+    <!-- Printable Receipt Area (මෙය පෙනෙන්නේ Print කිරීමේදී පමණි) -->
     <div id="print-receipt">
         <div class="receipt-container text-center">
             <h4 class="mb-0 fw-bold">Kelum Koonara</h4>
@@ -114,30 +114,24 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase SDK & Application Logic (JavaScript & JSON Config) -->
+    <!-- Firebase SDK & Application Logic (Realtime Database) -->
     <script type="module">
         // 1. Firebase Modules Import කිරීම
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 2. Firebase Configuration (JSON format object)
-        // **වැදගත්: ඔබගේ Firebase Project එකේ Settings වලින් ලබාගන්නා Config එක මෙතනට Paste කරන්න**
+        // 2. Firebase Configuration (ඔබ ලබාදුන් Realtime Database URL එක)
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            databaseURL: "https://class-fee-management-default-rtdb.firebaseio.com/"
         };
 
         // 3. Firebase Initialize කිරීම
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
         // 4. Form Submission Logic
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // පිටුව refresh වීම නවතයි
+            e.preventDefault(); 
             
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = "කරුණාකර රැඳී සිටින්න...";
@@ -148,12 +142,13 @@
             const amount = document.getElementById('amount').value;
             
             try {
-                // Firebase Firestore එකට දත්ත යැවීම
-                await addDoc(collection(db, "payments"), {
+                // Firebase Realtime Database හි "payments" නෝඩයට දත්ත යැවීම
+                const paymentsRef = ref(db, 'payments');
+                await push(paymentsRef, {
                     student_id: studentId,
                     month: paymentMonth,
                     amount: Number(amount),
-                    timestamp: serverTimestamp() // දැනට පවතින වේලාව
+                    timestamp: serverTimestamp() 
                 });
                 
                 // සාර්ථක වූ පසු Receipt එකේ දත්ත යාවත්කාලීන කිරීම (Update DOM)
@@ -173,7 +168,7 @@
                 
             } catch (error) {
                 console.error("Error saving data: ", error);
-                alert("ගෙවීම සටහන් කිරීමේදී දෝෂයක් මතු විය! අන්තර්ජාල සම්බන්ධතාවය සහ Firebase Config පරීක්ෂා කරන්න.");
+                alert("ගෙවීම සටහන් කිරීමේදී දෝෂයක් මතු විය! කරුණාකර Firebase Database Rules පරීක්ෂා කරන්න.");
             } finally {
                 // Button එක නැවත යථා තත්ත්වයට පත් කිරීම
                 btn.innerHTML = "ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න";
