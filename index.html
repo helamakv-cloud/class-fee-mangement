@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,30 +8,22 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Custom CSS (Screen and Print styles) -->
     <style>
-        /* සාමාන්‍ය තිරයේදී (Screen) බිල්පත සඟවා තැබීම */
+        /* සාමාන්‍ය තිරයේදී Print බිල්පත සඟවා තැබීම */
         @media screen {
-            #print-receipt {
-                display: none;
-            }
+            #print-receipt { display: none; }
         }
 
         /* මුද්‍රණය කරන අවස්ථාවේදී (Print) අවශ්‍ය CSS */
         @media print {
-            body * {
-                visibility: hidden; /* මුළු පිටුවම නොපෙනී යයි */
-            }
-            #print-receipt, #print-receipt * {
-                visibility: visible; /* බිල්පත පමණක් පෙනෙන ලෙස සකසයි */
-            }
+            body * { visibility: hidden; } /* මුළු පිටුවම නොපෙනී යයි */
+            #print-receipt, #print-receipt * { visibility: visible; } /* බිල්පත පමණක් පෙනේ */
             #print-receipt {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
             }
-            /* POS Printer එකට ගැලපෙන ලෙස බිල්පතේ පළල මිලිමීටර් 80 කට සැකසීම */
             .receipt-container {
                 width: 80mm;
                 margin: 0 auto;
@@ -39,33 +31,51 @@
                 font-size: 14px;
             }
         }
+        
+        .table-responsive { max-height: 400px; overflow-y: auto; }
     </style>
 </head>
 <body class="bg-light">
 
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-dark bg-primary">
+    <nav class="navbar navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Class Fee Management System</span>
+            <span class="navbar-brand mb-0 h1">Class Fee Management System - By Kelum Koonara</span>
         </div>
     </nav>
 
     <!-- Main Content Area -->
-    <div class="container mt-5" id="main-content">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                
-                <!-- Payment Form Card -->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white text-primary fw-bold text-center fs-5">
+    <div class="container-fluid mt-4 mb-5" id="main-content">
+        <div class="row">
+            
+            <!-- Left Side: Payment Form -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white fw-bold text-center fs-5">
                         නව ගෙවීමක් ඇතුළත් කරන්න
                     </div>
-                    <div class="card-body">
+                    <div class="card-body bg-white">
                         <form id="paymentForm">
                             
                             <div class="mb-3">
+                                <label for="institute" class="form-label fw-bold">ආයතනය (Institute)</label>
+                                <select class="form-select" id="institute" required>
+                                    <option value="" disabled selected>ආයතනය තෝරන්න...</option>
+                                    <option value="Institute A - Buttala">Institute A - Buttala</option>
+                                    <option value="Institute B - Monaragala">Institute B - Monaragala</option>
+                                    <option value="Institute C">Institute C</option>
+                                    <!-- ඔබට අවශ්‍ය පරිදි මෙහි ආයතන නම් වෙනස් කරගන්න -->
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="studentId" class="form-label fw-bold">ශිෂ්‍ය අංකය (Student ID)</label>
                                 <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="studentName" class="form-label fw-bold">ශිෂ්‍යයාගේ නම (Name)</label>
+                                <input type="text" class="form-control" id="studentName" placeholder="උදා: කමල් පෙරේරා" required>
                             </div>
 
                             <div class="mb-3">
@@ -78,13 +88,72 @@
                                 <input type="number" class="form-control" id="amount" placeholder="1500" required>
                             </div>
 
-                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-3">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
-                        
+                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-2">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
                         </form>
                     </div>
                 </div>
-
             </div>
+
+            <!-- Right Side: Reports & Data View -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white fw-bold fs-5">
+                        මාසික ගෙවීම් වාර්තා (Monthly Reports)
+                    </div>
+                    <div class="card-body bg-white">
+                        
+                        <!-- Filter Options -->
+                        <div class="row mb-3 align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label fw-bold">ආයතනය තෝරන්න:</label>
+                                <select class="form-select" id="filterInstitute">
+                                    <option value="All">සියලුම ආයතන (All)</option>
+                                    <option value="Institute A - Buttala">Institute A - Buttala</option>
+                                    <option value="Institute B - Monaragala">Institute B - Monaragala</option>
+                                    <option value="Institute C">Institute C</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label fw-bold">මාසය තෝරන්න:</label>
+                                <input type="month" class="form-control" id="filterMonth">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <button id="loadDataBtn" class="btn btn-success w-100 fw-bold">වාර්තාව පෙන්වන්න</button>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Data Table -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover text-center">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>දිනය</th>
+                                        <th>ආයතනය</th>
+                                        <th>ශිෂ්‍ය අංකය</th>
+                                        <th>නම</th>
+                                        <th>මුදල (Rs.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-muted">දත්ත බැලීම සඳහා ඉහතින් ආයතනය සහ මාසය තෝරා "වාර්තාව පෙන්වන්න" බොත්තම ඔබන්න.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Total Collection Display -->
+                        <div class="alert alert-info mt-3 text-end mb-0">
+                            <h4 class="mb-0 fw-bold">මුළු එකතුව: Rs. <span id="totalAmountDisplay">0.00</span></h4>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -92,17 +161,18 @@
     <div id="print-receipt">
         <div class="receipt-container text-center">
             <h4 class="mb-0 fw-bold">Kelum Koonara</h4>
-            <p class="mb-0">ICT Classes - Buttala</p>
+            <p class="mb-0" id="r-institute-name">ICT Classes</p>
             <p class="mb-1">Tel: 07X-XXXXXXX</p>
             <hr style="border-top: 1px dashed black;">
             <h5 class="fw-bold">PAYMENT RECEIPT</h5>
             <hr style="border-top: 1px dashed black;">
             
             <div class="text-start ms-2">
-                <p class="mb-1"><strong>Date & Time:</strong> <span id="r-date"></span></p>
-                <p class="mb-1"><strong>Student ID :</strong> <span id="r-studentid"></span></p>
-                <p class="mb-1"><strong>Month      :</strong> <span id="r-month"></span></p>
-                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount : Rs. <span id="r-amount"></span></strong></p>
+                <p class="mb-1"><strong>Date :</strong> <span id="r-date"></span></p>
+                <p class="mb-1"><strong>ID   :</strong> <span id="r-studentid"></span></p>
+                <p class="mb-1"><strong>Name :</strong> <span id="r-name"></span></p>
+                <p class="mb-1"><strong>Month:</strong> <span id="r-month"></span></p>
+                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount: Rs.<span id="r-amount"></span></strong></p>
             </div>
             
             <hr style="border-top: 1px dashed black;">
@@ -114,22 +184,19 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase SDK & Application Logic (Realtime Database) -->
+    <!-- Firebase SDK & Logic -->
     <script type="module">
-        // 1. Firebase Modules Import කිරීම
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 2. Firebase Configuration (ඔබ ලබාදුන් Realtime Database URL එක)
         const firebaseConfig = {
             databaseURL: "https://class-fee-management-default-rtdb.firebaseio.com/"
         };
 
-        // 3. Firebase Initialize කිරීම
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 4. Form Submission Logic
+        // 1. ගෙවීම් ඇතුළත් කිරීමේ ක්‍රියාවලිය (Add Payment)
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault(); 
             
@@ -137,45 +204,122 @@
             btn.innerHTML = "කරුණාකර රැඳී සිටින්න...";
             btn.disabled = true;
 
+            const institute = document.getElementById('institute').value;
             const studentId = document.getElementById('studentId').value;
+            const studentName = document.getElementById('studentName').value;
             const paymentMonth = document.getElementById('paymentMonth').value;
-            const amount = document.getElementById('amount').value;
+            const amount = parseFloat(document.getElementById('amount').value);
             
+            const currentDate = new Date();
+            const dateString = currentDate.toLocaleDateString();
+            const timeString = currentDate.toLocaleTimeString();
+
             try {
-                // Firebase Realtime Database හි "payments" නෝඩයට දත්ත යැවීම
+                // Database එකට දත්ත යැවීම
                 const paymentsRef = ref(db, 'payments');
                 await push(paymentsRef, {
+                    institute: institute,
                     student_id: studentId,
+                    student_name: studentName,
                     month: paymentMonth,
-                    amount: Number(amount),
-                    timestamp: serverTimestamp() 
+                    amount: amount,
+                    date: dateString,
+                    time: timeString,
+                    timestamp: Date.now() // Record sorting සඳහා
                 });
                 
-                // සාර්ථක වූ පසු Receipt එකේ දත්ත යාවත්කාලීන කිරීම (Update DOM)
-                const dateObj = new Date();
-                const formattedDate = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString();
-                
-                document.getElementById('r-date').innerText = formattedDate;
+                // Receipt එකේ දත්ත යාවත්කාලීන කිරීම
+                document.getElementById('r-institute-name').innerText = institute;
+                document.getElementById('r-date').innerText = dateString + " " + timeString;
                 document.getElementById('r-studentid').innerText = studentId.toUpperCase();
+                document.getElementById('r-name').innerText = studentName;
                 document.getElementById('r-month').innerText = paymentMonth;
-                document.getElementById('r-amount').innerText = amount;
+                document.getElementById('r-amount').innerText = amount.toFixed(2);
                 
-                // බිල්පත මුද්‍රණය කිරීම (Browser's print dialog)
                 window.print();
                 
-                // Form එක නැවත හිස් කිරීම
                 document.getElementById('paymentForm').reset();
                 
+                // අලුත් ගෙවීමක් දැමූ විට Report එකත් refresh කිරීම
+                if(document.getElementById('filterMonth').value !== "") {
+                    loadReportData();
+                }
+
             } catch (error) {
-                console.error("Error saving data: ", error);
-                alert("ගෙවීම සටහන් කිරීමේදී දෝෂයක් මතු විය! කරුණාකර Firebase Database Rules පරීක්ෂා කරන්න.");
+                console.error("Error saving: ", error);
+                alert("දෝෂයක්! කරුණාකර අන්තර්ජාලය සහ Firebase පරීක්ෂා කරන්න.");
             } finally {
-                // Button එක නැවත යථා තත්ත්වයට පත් කිරීම
                 btn.innerHTML = "ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න";
                 btn.disabled = false;
             }
         });
-    </script>
 
+        // 2. දත්ත වගුවට ලබාගැනීමේ ක්‍රියාවලිය (Load Reports)
+        document.getElementById('loadDataBtn').addEventListener('click', loadReportData);
+
+        async function loadReportData() {
+            const filterInst = document.getElementById('filterInstitute').value;
+            const filterMonth = document.getElementById('filterMonth').value;
+            
+            const tableBody = document.getElementById('reportTableBody');
+            const totalDisplay = document.getElementById('totalAmountDisplay');
+
+            if (!filterMonth) {
+                alert("කරුණාකර වාර්තාව බැලීම සඳහා මාසයක් තෝරන්න!");
+                return;
+            }
+
+            tableBody.innerHTML = '<tr><td colspan="6">දත්ත ලබාගනිමින් පවතී...</td></tr>';
+            totalDisplay.innerText = "0.00";
+
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `payments`));
+                
+                if (snapshot.exists()) {
+                    let totalAmount = 0;
+                    let tableHTML = "";
+                    let count = 1;
+
+                    // සියලුම දත්ත හරහා ගොස් ෆිල්ටර් කිරීම
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        
+                        // ආයතනය සහ මාසය ගැලපෙනවාදැයි පරීක්ෂා කිරීම
+                        const instMatch = (filterInst === "All" || data.institute === filterInst);
+                        const monthMatch = (data.month === filterMonth);
+
+                        if (instMatch && monthMatch) {
+                            tableHTML += `
+                                <tr>
+                                    <td>${count}</td>
+                                    <td>${data.date}</td>
+                                    <td>${data.institute}</td>
+                                    <td>${data.student_id}</td>
+                                    <td>${data.student_name}</td>
+                                    <td class="fw-bold">${data.amount.toFixed(2)}</td>
+                                </tr>
+                            `;
+                            totalAmount += parseFloat(data.amount);
+                            count++;
+                        }
+                    });
+
+                    if (count === 1) {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">මෙම මාසය සහ ආයතනය සඳහා ගෙවීම් වාර්තා නොමැත.</td></tr>';
+                    } else {
+                        tableBody.innerHTML = tableHTML;
+                        totalDisplay.innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත ගබඩාවේ කිසිදු ගෙවීමක් නොමැත.</td></tr>';
+                }
+            } catch (error) {
+                console.error("Error getting data: ", error);
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත ලබාගැනීමේදී දෝෂයක් මතු විය!</td></tr>';
+            }
+        }
+    </script>
 </body>
 </html>
