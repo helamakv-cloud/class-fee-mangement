@@ -16,8 +16,8 @@
 
         /* මුද්‍රණය කරන අවස්ථාවේදී (Print) අවශ්‍ය CSS */
         @media print {
-            body * { visibility: hidden; } /* මුළු පිටුවම නොපෙනී යයි */
-            #print-receipt, #print-receipt * { visibility: visible; } /* බිල්පත පමණක් පෙනේ */
+            body * { visibility: hidden; } 
+            #print-receipt, #print-receipt * { visibility: visible; } 
             #print-receipt {
                 position: absolute;
                 left: 0;
@@ -46,123 +46,270 @@
 
     <!-- Main Content Area -->
     <div class="container-fluid mt-4 mb-5" id="main-content">
-        <div class="row">
+        
+        <!-- Tabs for Payments and Attendance -->
+        <ul class="nav nav-tabs mb-4" id="systemTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">ගෙවීම් (Payments)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button" role="tab">පැමිණීම (Attendance)</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
             
-            <!-- Left Side: Payment Form -->
-            <div class="col-lg-4 mb-4">
-                <div class="card shadow-sm border-primary">
-                    <div class="card-header bg-primary text-white fw-bold text-center fs-5">
-                        නව ගෙවීමක් ඇතුළත් කරන්න
+            <!-- ===================== PAYMENT TAB ===================== -->
+            <div class="tab-pane fade show active" id="payment" role="tabpanel" tabindex="0">
+                <div class="row">
+                    <!-- Left Side: Payment Form -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-header bg-primary text-white fw-bold text-center fs-5">
+                                නව ගෙවීමක් ඇතුළත් කරන්න
+                            </div>
+                            <div class="card-body bg-white">
+                                <form id="paymentForm">
+                                    
+                                    <div class="mb-3">
+                                        <label for="institute" class="form-label fw-bold">ආයතනය (Institute)</label>
+                                        <select class="form-select" id="institute" required>
+                                            <option value="" disabled selected>ආයතනය තෝරන්න...</option>
+                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
+                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="teacherName" class="form-label fw-bold">ගුරුවරයා (Teacher)</label>
+                                        <select class="form-select" id="teacherName" required>
+                                            <option value="" disabled selected>ගුරුවරයා තෝරන්න...</option>
+                                            <option value="කමල් සර්">කමල් සර්</option>
+                                            <option value="නිමල් සර්">නිමල් සර්</option>
+                                            <option value="සුනිල් සර්">සුනිල් සර්</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="subjectName" class="form-label fw-bold">විෂය (Subject)</label>
+                                        <select class="form-select" id="subjectName" required>
+                                            <option value="" disabled selected>විෂය තෝරන්න...</option>
+                                            <option value="ICT">ICT</option>
+                                            <option value="Science">Science</option>
+                                            <option value="Mathematics">Mathematics</option>
+                                            <option value="English">English</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="studentId" class="form-label fw-bold">ශිෂ්‍ය අංකය (Student ID)</label>
+                                        <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="studentName" class="form-label fw-bold">ශිෂ්‍යයාගේ නම (Name)</label>
+                                        <input type="text" class="form-control" id="studentName" placeholder="උදා: කමල් පෙරේරා" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="paymentMonth" class="form-label fw-bold">ගෙවන මාසය (Month)</label>
+                                        <input type="month" class="form-control" id="paymentMonth" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label fw-bold">මුදල (Amount - Rs)</label>
+                                        <input type="number" class="form-control" id="amount" placeholder="1500" required>
+                                    </div>
+
+                                    <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-2">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body bg-white">
-                        <form id="paymentForm">
-                            
-                            <div class="mb-3">
-                                <label for="institute" class="form-label fw-bold">ආයතනය (Institute)</label>
-                                <select class="form-select" id="institute" required>
-                                    <option value="" disabled selected>ආයතනය තෝරන්න...</option>
-                                    <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
-                                    <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
-                                    <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
-                                </select>
-                            </div>
 
-                            <div class="mb-3">
-                                <label for="teacherName" class="form-label fw-bold">ගුරුවරයාගේ නම (Teacher's Name)</label>
-                                <input type="text" class="form-control" id="teacherName" placeholder="උදා: නම ඇතුළත් කරන්න" required>
+                    <!-- Right Side: Reports & Data View -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-dark text-white fw-bold fs-5">
+                                මාසික ගෙවීම් වාර්තා (Monthly Reports)
                             </div>
+                            <div class="card-body bg-white">
+                                
+                                <!-- Filter Options -->
+                                <div class="row mb-3 align-items-end">
+                                    <div class="col-md-4 mb-2">
+                                        <label class="form-label fw-bold">ආයතනය තෝරන්න:</label>
+                                        <select class="form-select" id="filterInstitute">
+                                            <option value="All">සියලුම ආයතන (All)</option>
+                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
+                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <label class="form-label fw-bold">මාසය තෝරන්න:</label>
+                                        <input type="month" class="form-control" id="filterMonth">
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <button id="loadDataBtn" class="btn btn-success w-100 fw-bold">වාර්තාව පෙන්වන්න</button>
+                                    </div>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="subjectName" class="form-label fw-bold">විෂය (Subject)</label>
-                                <input type="text" class="form-control" id="subjectName" placeholder="උදා: ICT" required>
+                                <hr>
+
+                                <!-- Data Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover text-center">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>දිනය</th>
+                                                <th>ආයතනය</th>
+                                                <th>විෂය</th>
+                                                <th>ශිෂ්‍ය අංකය</th>
+                                                <th>නම</th>
+                                                <th>මුදල (Rs.)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reportTableBody">
+                                            <tr>
+                                                <td colspan="7" class="text-muted">දත්ත බැලීම සඳහා ඉහතින් ආයතනය සහ මාසය තෝරා "වාර්තාව පෙන්වන්න" බොත්තම ඔබන්න.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Total Collection Display -->
+                                <div class="alert alert-info mt-3 text-end mb-0">
+                                    <h4 class="mb-0 fw-bold">මුළු එකතුව: Rs. <span id="totalAmountDisplay">0.00</span></h4>
+                                </div>
+
                             </div>
-
-                            <div class="mb-3">
-                                <label for="studentId" class="form-label fw-bold">ශිෂ්‍ය අංකය (Student ID)</label>
-                                <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="studentName" class="form-label fw-bold">ශිෂ්‍යයාගේ නම (Name)</label>
-                                <input type="text" class="form-control" id="studentName" placeholder="උදා: කමල් පෙරේරා" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="paymentMonth" class="form-label fw-bold">ගෙවන මාසය (Month)</label>
-                                <input type="month" class="form-control" id="paymentMonth" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="amount" class="form-label fw-bold">මුදල (Amount - Rs)</label>
-                                <input type="number" class="form-control" id="amount" placeholder="1500" required>
-                            </div>
-
-                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-2">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Reports & Data View -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white fw-bold fs-5">
-                        මාසික ගෙවීම් වාර්තා (Monthly Reports)
+            <!-- ===================== ATTENDANCE TAB ===================== -->
+            <div class="tab-pane fade" id="attendance" role="tabpanel" tabindex="0">
+                <div class="row">
+                    <!-- Left Side: Attendance Form -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card shadow-sm border-success">
+                            <div class="card-header bg-success text-white fw-bold text-center fs-5">
+                                පැමිණීම සටහන් කරන්න
+                            </div>
+                            <div class="card-body bg-white">
+                                <form id="attendanceForm">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">ආයතනය (Institute)</label>
+                                        <select class="form-select" id="attInstitute" required>
+                                            <option value="" disabled selected>ආයතනය තෝරන්න...</option>
+                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
+                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">විෂය (Subject)</label>
+                                        <select class="form-select" id="attSubject" required>
+                                            <option value="" disabled selected>විෂය තෝරන්න...</option>
+                                            <option value="ICT">ICT</option>
+                                            <option value="Science">Science</option>
+                                            <option value="Mathematics">Mathematics</option>
+                                            <option value="English">English</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">දිනය (Date)</label>
+                                        <input type="date" class="form-control" id="attDate" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">ශිෂ්‍ය අංකය (Student ID)</label>
+                                        <input type="text" class="form-control" id="attStudentId" placeholder="උදා: STU001" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">ශිෂ්‍යයාගේ නම (Name)</label>
+                                        <input type="text" class="form-control" id="attStudentName" placeholder="උදා: කමල් පෙරේරා" required>
+                                    </div>
+
+                                    <button type="submit" id="btnAttendance" class="btn btn-success w-100 fw-bold mt-2">පැමිණීම සටහන් කරන්න</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body bg-white">
-                        
-                        <!-- Filter Options -->
-                        <div class="row mb-3 align-items-end">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label fw-bold">ආයතනය තෝරන්න:</label>
-                                <select class="form-select" id="filterInstitute">
-                                    <option value="All">සියලුම ආයතන (All)</option>
-                                    <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
-                                    <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
-                                    <option value="කණ්ඩායම් පන්ති">කණ්ඩායම් පන්ති</option>
-                                </select>
+
+                    <!-- Right Side: Attendance Reports -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-dark text-white fw-bold fs-5">
+                                පැමිණීම් නාම ලේඛනය (Attendance List)
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label fw-bold">මාසය තෝරන්න:</label>
-                                <input type="month" class="form-control" id="filterMonth">
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <button id="loadDataBtn" class="btn btn-success w-100 fw-bold">වාර්තාව පෙන්වන්න</button>
+                            <div class="card-body bg-white">
+                                
+                                <div class="row mb-3 align-items-end">
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label fw-bold">ආයතනය:</label>
+                                        <select class="form-select" id="filterAttInstitute">
+                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC</option>
+                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය</option>
+                                            <option value="කණ්ඩායම් පන්ති">කණ්ඩායම්</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label fw-bold">විෂය:</label>
+                                        <select class="form-select" id="filterAttSubject">
+                                            <option value="ICT">ICT</option>
+                                            <option value="Science">Science</option>
+                                            <option value="Mathematics">Mathematics</option>
+                                            <option value="English">English</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="form-label fw-bold">දිනය:</label>
+                                        <input type="date" class="form-control" id="filterAttDate">
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <button id="loadAttBtn" class="btn btn-primary w-100 fw-bold">ලේඛනය පෙන්වන්න</button>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover text-center">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>ශිෂ්‍ය අංකය</th>
+                                                <th>නම</th>
+                                                <th>වේලාව</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="attendanceTableBody">
+                                            <tr>
+                                                <td colspan="4" class="text-muted">ඉහතින් ආයතනය, විෂය සහ දිනය තෝරා වාර්තාව පෙන්වන්න ඔබන්න.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="alert alert-secondary mt-3 text-end mb-0">
+                                    <h5 class="mb-0 fw-bold">මුළු පැමිණීම: <span id="totalAttendanceDisplay">0</span></h5>
+                                </div>
+
                             </div>
                         </div>
-
-                        <hr>
-
-                        <!-- Data Table -->
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover text-center">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>දිනය</th>
-                                        <th>ආයතනය</th>
-                                        <th>ශිෂ්‍ය අංකය</th>
-                                        <th>නම</th>
-                                        <th>මුදල (Rs.)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportTableBody">
-                                    <tr>
-                                        <td colspan="6" class="text-muted">දත්ත බැලීම සඳහා ඉහතින් ආයතනය සහ මාසය තෝරා "වාර්තාව පෙන්වන්න" බොත්තම ඔබන්න.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Total Collection Display -->
-                        <div class="alert alert-info mt-3 text-end mb-0">
-                            <h4 class="mb-0 fw-bold">මුළු එකතුව: Rs. <span id="totalAmountDisplay">0.00</span></h4>
-                        </div>
-
                     </div>
                 </div>
             </div>
-
+            
         </div>
     </div>
 
@@ -204,6 +351,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // අද දිනය Set කිරීම
+        document.getElementById('attDate').valueAsDate = new Date();
+        document.getElementById('filterAttDate').valueAsDate = new Date();
+
         // 1. ගෙවීම් ඇතුළත් කිරීමේ ක්‍රියාවලිය (Add Payment)
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault(); 
@@ -215,7 +366,7 @@
             const institute = document.getElementById('institute').value;
             const teacherName = document.getElementById('teacherName').value;
             const subjectName = document.getElementById('subjectName').value;
-            const studentId = document.getElementById('studentId').value;
+            const studentId = document.getElementById('studentId').value.toUpperCase();
             const studentName = document.getElementById('studentName').value;
             const paymentMonth = document.getElementById('paymentMonth').value;
             const amount = parseFloat(document.getElementById('amount').value);
@@ -225,6 +376,28 @@
             const timeString = currentDate.toLocaleTimeString();
 
             try {
+                // Duplicate Payment (දෙවරක් ගෙවීම) පරීක්ෂා කිරීම
+                const dbRef = ref(db);
+                const paymentsSnapshot = await get(child(dbRef, `payments`));
+                let isDuplicate = false;
+
+                if (paymentsSnapshot.exists()) {
+                    paymentsSnapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        // එකම ශිෂ්‍යයා, එකම විෂය සහ එකම මාසය නම්
+                        if (data.student_id === studentId && data.subject === subjectName && data.month === paymentMonth) {
+                            isDuplicate = true;
+                        }
+                    });
+                }
+
+                if (isDuplicate) {
+                    alert("අවධානයයි: මෙම ශිෂ්‍යයා මෙම මාසයට අදාළ විෂය සඳහා දැනටමත් ගෙවා ඇත! (Already paid for this month)");
+                    btn.innerHTML = "ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න";
+                    btn.disabled = false;
+                    return; // දත්ත Database එකට යැවීම නවත්වයි
+                }
+
                 // Database එකට දත්ත යැවීම
                 const paymentsRef = ref(db, 'payments');
                 await push(paymentsRef, {
@@ -237,13 +410,13 @@
                     amount: amount,
                     date: dateString,
                     time: timeString,
-                    timestamp: Date.now() // Record sorting සඳහා
+                    timestamp: Date.now() 
                 });
                 
                 // Receipt එකේ දත්ත යාවත්කාලීන කිරීම
                 document.getElementById('r-institute-name').innerText = institute;
                 document.getElementById('r-date').innerText = dateString + " " + timeString;
-                document.getElementById('r-studentid').innerText = studentId.toUpperCase();
+                document.getElementById('r-studentid').innerText = studentId;
                 document.getElementById('r-name').innerText = studentName;
                 document.getElementById('r-teacher').innerText = teacherName;
                 document.getElementById('r-subject').innerText = subjectName;
@@ -254,7 +427,6 @@
                 
                 document.getElementById('paymentForm').reset();
                 
-                // අලුත් ගෙවීමක් දැමූ විට Report එකත් refresh කිරීම
                 if(document.getElementById('filterMonth').value !== "") {
                     loadReportData();
                 }
@@ -268,7 +440,7 @@
             }
         });
 
-        // 2. දත්ත වගුවට ලබාගැනීමේ ක්‍රියාවලිය (Load Reports)
+        // 2. දත්ත වගුවට ලබාගැනීමේ ක්‍රියාවලිය (Load Payment Reports)
         document.getElementById('loadDataBtn').addEventListener('click', loadReportData);
 
         async function loadReportData() {
@@ -283,7 +455,7 @@
                 return;
             }
 
-            tableBody.innerHTML = '<tr><td colspan="6">දත්ත ලබාගනිමින් පවතී...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7">දත්ත ලබාගනිමින් පවතී...</td></tr>';
             totalDisplay.innerText = "0.00";
 
             try {
@@ -295,11 +467,8 @@
                     let tableHTML = "";
                     let count = 1;
 
-                    // සියලුම දත්ත හරහා ගොස් ෆිල්ටර් කිරීම
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        
-                        // ආයතනය සහ මාසය ගැලපෙනවාදැයි පරීක්ෂා කිරීම
                         const instMatch = (filterInst === "All" || data.institute === filterInst);
                         const monthMatch = (data.month === filterMonth);
 
@@ -309,6 +478,7 @@
                                     <td>${count}</td>
                                     <td>${data.date}</td>
                                     <td>${data.institute}</td>
+                                    <td>${data.subject}</td>
                                     <td>${data.student_id}</td>
                                     <td>${data.student_name}</td>
                                     <td class="fw-bold">${data.amount.toFixed(2)}</td>
@@ -320,18 +490,120 @@
                     });
 
                     if (count === 1) {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">මෙම මාසය සහ ආයතනය සඳහා ගෙවීම් වාර්තා නොමැත.</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="7" class="text-danger">මෙම මාසය සහ ආයතනය සඳහා ගෙවීම් වාර්තා නොමැත.</td></tr>';
                     } else {
                         tableBody.innerHTML = tableHTML;
                         totalDisplay.innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     }
-
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත ගබඩාවේ කිසිදු ගෙවීමක් නොමැත.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-danger">දත්ත ගබඩාවේ කිසිදු ගෙවීමක් නොමැත.</td></tr>';
                 }
             } catch (error) {
                 console.error("Error getting data: ", error);
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත ලබාගැනීමේදී දෝෂයක් මතු විය!</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-danger">දත්ත ලබාගැනීමේදී දෝෂයක් මතු විය!</td></tr>';
+            }
+        }
+
+        // 3. පැමිණීම සටහන් කිරීම (Add Attendance)
+        document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnAttendance');
+            btn.innerHTML = "කරුණාකර රැඳී සිටින්න...";
+            btn.disabled = true;
+
+            const institute = document.getElementById('attInstitute').value;
+            const subject = document.getElementById('attSubject').value;
+            const date = document.getElementById('attDate').value;
+            const studentId = document.getElementById('attStudentId').value.toUpperCase();
+            const studentName = document.getElementById('attStudentName').value;
+            const timeString = new Date().toLocaleTimeString();
+
+            try {
+                const attRef = ref(db, 'attendance');
+                await push(attRef, {
+                    institute: institute,
+                    subject: subject,
+                    date: date,
+                    student_id: studentId,
+                    student_name: studentName,
+                    time: timeString,
+                    timestamp: Date.now()
+                });
+
+                alert("පැමිණීම සාර්ථකව සටහන් කරන ලදී!");
+                
+                // Fields clear කිරීම (ආයතනය, විෂය, දිනය ඉතිරි කරයි)
+                document.getElementById('attStudentId').value = '';
+                document.getElementById('attStudentName').value = '';
+                document.getElementById('attStudentId').focus();
+
+                loadAttendanceData(); // වගුව refresh කිරීම
+
+            } catch (error) {
+                console.error("Attendance Error: ", error);
+                alert("දෝෂයක් මතු විය!");
+            } finally {
+                btn.innerHTML = "පැමිණීම සටහන් කරන්න";
+                btn.disabled = false;
+            }
+        });
+
+        // 4. පැමිණීම් වාර්තා බැලීම (Load Attendance Reports)
+        document.getElementById('loadAttBtn').addEventListener('click', loadAttendanceData);
+
+        async function loadAttendanceData() {
+            const filterInst = document.getElementById('filterAttInstitute').value;
+            const filterSubj = document.getElementById('filterAttSubject').value;
+            const filterDate = document.getElementById('filterAttDate').value;
+            
+            const tableBody = document.getElementById('attendanceTableBody');
+            const totalDisplay = document.getElementById('totalAttendanceDisplay');
+
+            if (!filterDate) {
+                alert("කරුණාකර දිනයක් තෝරන්න!");
+                return;
+            }
+
+            tableBody.innerHTML = '<tr><td colspan="4">දත්ත ලබාගනිමින් පවතී...</td></tr>';
+            totalDisplay.innerText = "0";
+
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `attendance`));
+                
+                if (snapshot.exists()) {
+                    let tableHTML = "";
+                    let count = 1;
+
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        
+                        if (data.institute === filterInst && data.subject === filterSubj && data.date === filterDate) {
+                            tableHTML += `
+                                <tr>
+                                    <td>${count}</td>
+                                    <td class="fw-bold text-primary">${data.student_id}</td>
+                                    <td>${data.student_name}</td>
+                                    <td>${data.time}</td>
+                                </tr>
+                            `;
+                            count++;
+                        }
+                    });
+
+                    if (count === 1) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-danger">මෙම දිනය සඳහා පැමිණීම් වාර්තා නොමැත.</td></tr>';
+                    } else {
+                        tableBody.innerHTML = tableHTML;
+                        totalDisplay.innerText = (count - 1).toString();
+                    }
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-danger">දත්ත ගබඩාවේ කිසිදු වාර්තාවක් නොමැත.</td></tr>';
+                }
+            } catch (error) {
+                console.error("Error getting attendance: ", error);
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-danger">දත්ත ලබාගැනීමේදී දෝෂයක් මතු විය!</td></tr>';
             }
         }
     </script>
