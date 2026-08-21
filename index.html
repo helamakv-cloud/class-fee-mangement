@@ -222,12 +222,20 @@
                                     </div>
                                 </div>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped text-center">
+                                    <table class="table table-bordered table-striped text-center align-middle">
                                         <thead class="table-dark">
-                                            <tr><th>#</th><th>ආයතනය</th><th>ශ්‍රේණිය</th><th>ID</th><th>නම</th><th>දුරකථන අංකය</th></tr>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>ආයතනය</th>
+                                                <th>ශ්‍රේණිය</th>
+                                                <th>ID</th>
+                                                <th>නම</th>
+                                                <th>දුරකථන අංකය</th>
+                                                <th>ක්‍රියාව</th>
+                                            </tr>
                                         </thead>
                                         <tbody id="studentTableBody">
-                                            <tr><td colspan="6" class="text-muted">දත්ත බැලීමට "ලේඛනය පෙන්වන්න" ඔබන්න.</td></tr>
+                                            <tr><td colspan="7" class="text-muted">දත්ත බැලීමට "ලේඛනය පෙන්වන්න" ඔබන්න.</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -486,7 +494,8 @@
     <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        // 'remove' function is added below to allow deleting records
+        import { getDatabase, ref, push, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             databaseURL: "https://class-fee-management-default-rtdb.firebaseio.com/"
@@ -498,9 +507,21 @@
         document.getElementById('attDate').valueAsDate = new Date();
         document.getElementById('filterAttDate').valueAsDate = new Date();
 
-        // ==========================================
+        // සිසුන් පද්ධතියෙන් ඉවත් කිරීමේ function එක (Delete Student)
+        window.deleteStudent = async function(key, name) {
+            if(confirm(`"${name}" සිසුවා පද්ධතියෙන් සම්පූර්ණයෙන්ම ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?`)) {
+                try {
+                    await remove(ref(db, `students/${key}`));
+                    alert("සිසුවා සාර්ථකව පද්ධතියෙන් ඉවත් කරන ලදී!");
+                    document.getElementById('loadStudentsBtn').click(); // වගුව refresh කිරීම
+                } catch(error) {
+                    console.error("Delete Error:", error);
+                    alert("ඉවත් කිරීමේදී දෝෂයක් මතු විය!");
+                }
+            }
+        };
+
         // 1. ශිෂ්‍ය ලියාපදිංචිය (Auto ID Generation)
-        // ==========================================
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnRegister');
@@ -514,7 +535,6 @@
             try {
                 const dbRef = ref(db);
                 
-                // දැනට දත්ත ගබඩාවේ ඇති සිසුන්ගේ අංක පරීක්ෂා කර නව අංකය සෑදීම
                 const studentsSnapshot = await get(child(dbRef, `students`));
                 let maxId = 0;
 
@@ -522,7 +542,6 @@
                     studentsSnapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
                         if (data.student_id && data.student_id.startsWith("STU")) {
-                            // STU අකුරු ඉවත් කර ඉලක්කම පමණක් ගෙන පරීක්ෂා කිරීම
                             let num = parseInt(data.student_id.replace("STU", ""), 10);
                             if (!isNaN(num) && num > maxId) {
                                 maxId = num;
@@ -531,10 +550,8 @@
                     });
                 }
                 
-                // නව ශිෂ්‍ය අංකය සෑදීම (උදා: STU0001, STU0015)
                 const generatedStudentId = "STU" + (maxId + 1).toString().padStart(4, '0');
 
-                // දත්ත Database එකට යැවීම
                 const studentsRef = ref(db, 'students');
                 await push(studentsRef, {
                     institute, 
@@ -546,10 +563,10 @@
                     timestamp: Date.now()
                 });
 
-                // ලියාපදිංචිය සාර්ථක වූ බව සහ නව අංකය දැනුම් දීම
                 alert(`ශිෂ්‍යයා සාර්ථකව ලියාපදිංචි කරන ලදී!\n\nඔබගේ ශිෂ්‍ය අංකය: ${generatedStudentId}`);
-                
                 document.getElementById('registrationForm').reset();
+                // Register වූ විගස List එක refresh කරමු
+                document.getElementById('loadStudentsBtn').click();
             } catch (error) { 
                 console.error(error);
                 alert("දෝෂයක් මතු විය! අන්තර්ජාලය පරීක්ෂා කරන්න."); 
@@ -560,14 +577,14 @@
             }
         });
 
-        // ලියාපදිංචි සිසුන්ගේ වාර්තා
+        // ලියාපදිංචි සිසුන්ගේ වාර්තා (List with Delete button)
         document.getElementById('loadStudentsBtn').addEventListener('click', async () => {
             const filterInst = document.getElementById('filterRegInstitute').value;
             const filterGrade = document.getElementById('filterRegGrade').value;
             const tableBody = document.getElementById('studentTableBody');
             const totalDisplay = document.getElementById('totalStudentsDisplay');
 
-            tableBody.innerHTML = '<tr><td colspan="6">දත්ත ලබාගනිමින් පවතී...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7">දත්ත ලබාගනිමින් පවතී...</td></tr>';
             
             try {
                 const dbRef = ref(db);
@@ -577,13 +594,26 @@
                     snapshot.forEach((child) => {
                         const data = child.val();
                         if ((filterInst === "All" || data.institute === filterInst) && (filterGrade === "All" || data.grade === filterGrade)) {
-                            html += `<tr><td>${count++}</td><td>${data.institute}</td><td>${data.grade}</td><td class="fw-bold text-primary">${data.student_id}</td><td>${data.student_name}</td><td>${data.phone}</td></tr>`;
+                            // "ඉවත් කරන්න" Button එක මෙතනින් ඇතුලත් කර ඇත
+                            html += `
+                                <tr>
+                                    <td>${count++}</td>
+                                    <td>${data.institute}</td>
+                                    <td>${data.grade}</td>
+                                    <td class="fw-bold text-primary">${data.student_id}</td>
+                                    <td>${data.student_name}</td>
+                                    <td>${data.phone}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="deleteStudent('${child.key}', '${data.student_name}')">ඉවත් කරන්න</button>
+                                    </td>
+                                </tr>
+                            `;
                         }
                     });
-                    tableBody.innerHTML = count === 1 ? '<tr><td colspan="6" class="text-danger">දත්ත නොමැත.</td></tr>' : html;
+                    tableBody.innerHTML = count === 1 ? '<tr><td colspan="7" class="text-danger">දත්ත නොමැත.</td></tr>' : html;
                     totalDisplay.innerText = (count - 1).toString();
-                } else { tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත නොමැත.</td></tr>'; }
-            } catch (error) { tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දෝෂයක්!</td></tr>'; }
+                } else { tableBody.innerHTML = '<tr><td colspan="7" class="text-danger">දත්ත නොමැත.</td></tr>'; }
+            } catch (error) { tableBody.innerHTML = '<tr><td colspan="7" class="text-danger">දෝෂයක්!</td></tr>'; }
         });
 
         // 2. ගෙවීම්
