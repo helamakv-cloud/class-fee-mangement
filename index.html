@@ -138,16 +138,16 @@
             <div class="col-12 col-md-8 col-lg-5">
                 <div class="d-grid gap-3">
                     <button onclick="openSystem('registration')" class="btn btn-reg home-btn py-3 fs-5">
-                        📝 Registration (ලියාපදිංචිය)
+                        📝 Registration
                     </button>
                     <button onclick="openSystem('payment')" class="btn btn-pay home-btn py-3 fs-5">
-                        💰 Payments (ගෙවීම්)
+                        💰 Payments
                     </button>
                     <button onclick="openSystem('attendance')" class="btn btn-att home-btn py-3 fs-5">
-                        ✅ Attendance (පැමිණීම)
+                        ✅ Attendance
                     </button>
                     <button onclick="openSystem('reports')" class="btn btn-rep home-btn py-3 fs-5">
-                        📊 Student Reports (වාර්තා)
+                        📊 Student Reports
                     </button>
                 </div>
             </div>
@@ -175,7 +175,7 @@
 
         <div class="tab-content" id="myTabContent">
             
-            <!-- 1. REGISTRATION TAB (Updated with QR Scan for ID) -->
+            <!-- 1. REGISTRATION TAB -->
             <div class="tab-pane fade show active" id="registration" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -187,8 +187,8 @@
                                         <label class="form-label">Institute / Group</label>
                                         <select class="form-select" id="regInstitute" required>
                                             <option value="" disabled selected>Select Institute...</option>
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC Educational Institute - Buttala</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya Educational Institute - Pelwatte</option>
                                             <option value="Lunugala Group 1">Lunugala Group 1</option>
                                             <option value="Lunugala Group 2">Lunugala Group 2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa Group 1</option>
@@ -210,7 +210,6 @@
                                             <option value="Grade 13">Grade 13 (A/L)</option>
                                         </select>
                                     </div>
-                                    <!-- QR Scanner input for Registration ID -->
                                     <div class="mb-3">
                                         <label class="form-label">Student ID (QR Code)</label>
                                         <div class="input-group">
@@ -240,8 +239,8 @@
                                         <label class="form-label">Institute / Group:</label>
                                         <select class="form-select" id="filterRegInstitute">
                                             <option value="All">All Institutes</option>
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC Educational Institute</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya Educational Institute</option>
                                             <option value="Lunugala Group 1">Lunugala Group 1</option>
                                             <option value="Lunugala Group 2">Lunugala Group 2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa Group 1</option>
@@ -306,8 +305,8 @@
                                         <label class="form-label">Institute / Group</label>
                                         <select class="form-select" id="institute" required>
                                             <option value="" disabled selected>Select Institute...</option>
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC Educational Institute - Buttala</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya Educational Institute - Pelwatte</option>
                                             <option value="Lunugala Group 1">Lunugala Group 1</option>
                                             <option value="Lunugala Group 2">Lunugala Group 2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa Group 1</option>
@@ -351,7 +350,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Free Card Checkbox -->
                                     <div class="form-check mb-3 bg-light p-2 rounded border border-success d-flex align-items-center">
                                         <input class="form-check-input ms-1 border-success" type="checkbox" id="isFreeCard" style="transform: scale(1.2);">
                                         <label class="form-check-label text-success fw-bold ms-2" for="isFreeCard">
@@ -373,8 +371,8 @@
                                         <label class="form-label">Institute:</label>
                                         <select class="form-select" id="filterInstitute">
                                             <option value="All">All Institutes</option>
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC Educational Institute</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya Educational Institute</option>
                                             <option value="Lunugala Group 1">Lunugala Group 1</option>
                                             <option value="Lunugala Group 2">Lunugala Group 2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa Group 1</option>
@@ -401,7 +399,6 @@
                                     </table>
                                 </div>
 
-                                <!-- Net Pay Calculation Summary Box -->
                                 <div class="summary-box">
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3 mb-md-0">
@@ -438,8 +435,8 @@
                                         <label class="form-label">Institute / Group</label>
                                         <select class="form-select" id="attInstitute" required>
                                             <option value="" disabled selected>Select Institute...</option>
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC අධ්‍යාපන ආයතනය - බුත්තල</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC Educational Institute - Buttala</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya Educational Institute - Pelwatte</option>
                                             <option value="Lunugala Group 1">Lunugala Group 1</option>
                                             <option value="Lunugala Group 2">Lunugala Group 2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa Group 1</option>
@@ -483,8 +480,8 @@
                                     <div class="col-md-3 mb-2">
                                         <label class="form-label">Institute:</label>
                                         <select class="form-select" id="filterAttInstitute">
-                                            <option value="JEC අධ්‍යාපන ආයතනය - බුත්තල">JEC</option>
-                                            <option value="සවිය අධ්‍යාපන ආයතනය - පැල්වත්ත">Saviya</option>
+                                            <option value="JEC Educational Institute - Buttala">JEC</option>
+                                            <option value="Saviya Educational Institute - Pelwatte">Saviya</option>
                                             <option value="Lunugala Group 1">Lunugala G1</option>
                                             <option value="Lunugala Group 2">Lunugala G2</option>
                                             <option value="Hingurukaduwa Group 1">Hingurukaduwa G1</option>
@@ -741,7 +738,7 @@
 
 
         // ==========================================
-        // Registration Logic (Updated for manual/QR ID)
+        // Registration Logic 
         // ==========================================
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -959,7 +956,6 @@
             try {
                 await push(ref(db, 'attendance'), { institute, subject, date, student_id: studentId, student_name: studentName, time: new Date().toLocaleTimeString(), timestamp: Date.now() });
                 
-                // Show floating success message instead of block alert for speed during scanning
                 alert("✅ Attendance Marked for: " + studentName);
                 
                 document.getElementById('attStudentId').value = '';
