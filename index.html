@@ -59,7 +59,7 @@
         #attendance-tab { color: #198754; border-color: #198754; background: white; }
         #attendance-tab.active { background-color: #198754; color: white; box-shadow: 0 4px 10px rgba(25, 135, 84, 0.4); }
 
-        /* Mobile Bottom Navigation Layout for inner system */
+        /* Mobile Bottom Navigation Layout */
         @media (max-width: 768px) {
             #systemTabs {
                 position: fixed; bottom: 0; left: 0; right: 0;
@@ -85,7 +85,6 @@
     <nav class="navbar navbar-dark bg-primary shadow-sm">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <span class="navbar-brand mb-0 h1 fw-bold">Class Fee Management</span>
-            <!-- Home Button (Hidden on Home Page initially) -->
             <button id="navHomeBtn" class="btn btn-light btn-sm fw-bold text-primary" style="display: none;" onclick="goHome()">🏠 Home</button>
         </div>
     </nav>
@@ -100,7 +99,6 @@
 
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
-                <!-- Buttons stack vertically neatly on mobile -->
                 <div class="d-grid gap-4">
                     <button onclick="openSystem('registration')" class="btn btn-reg home-btn py-4 fs-3 shadow">
                         📝 ලියාපදිංචිය
@@ -169,9 +167,10 @@
                                             <option value="Grade 13">13 ශ්‍රේණිය (A/L)</option>
                                         </select>
                                     </div>
+                                    <!-- ස්වයංක්‍රීය ශිෂ්‍ය අංකය පෙන්වන කොටුව -->
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
-                                        <input type="text" class="form-control" id="regStudentId" placeholder="උදා: STU001" required>
+                                        <input type="text" class="form-control bg-light text-danger fw-bold text-center" id="regStudentId" value="ස්වයංක්‍රීයව සැකසේ (Auto Generated)" readonly>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">නම</label>
@@ -276,7 +275,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
-                                        <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
+                                        <input type="text" class="form-control" id="studentId" placeholder="උදා: STU0001" required>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">නම</label>
@@ -375,7 +374,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
-                                        <input type="text" class="form-control" id="attStudentId" placeholder="උදා: STU001" required>
+                                        <input type="text" class="form-control" id="attStudentId" placeholder="උදා: STU0001" required>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">නම</label>
@@ -468,19 +467,16 @@
     <!-- Navigation & UI Logic -->
     <script>
         function openSystem(tabName) {
-            // Hide Home, Show System
             document.getElementById('homePage').style.display = 'none';
             document.getElementById('mainSystem').style.display = 'block';
             document.getElementById('navHomeBtn').style.display = 'block';
 
-            // Trigger the correct tab
             let triggerEl = document.querySelector('#' + tabName + '-tab');
             let tab = new bootstrap.Tab(triggerEl);
             tab.show();
         }
 
         function goHome() {
-            // Hide System, Show Home
             document.getElementById('mainSystem').style.display = 'none';
             document.getElementById('navHomeBtn').style.display = 'none';
             document.getElementById('homePage').style.display = 'block';
@@ -502,7 +498,9 @@
         document.getElementById('attDate').valueAsDate = new Date();
         document.getElementById('filterAttDate').valueAsDate = new Date();
 
-        // 1. ශිෂ්‍ය ලියාපදිංචිය
+        // ==========================================
+        // 1. ශිෂ්‍ය ලියාපදිංචිය (Auto ID Generation)
+        // ==========================================
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnRegister');
@@ -510,41 +508,59 @@
 
             const institute = document.getElementById('regInstitute').value;
             const grade = document.getElementById('regGrade').value;
-            const studentId = document.getElementById('regStudentId').value.toUpperCase();
             const studentName = document.getElementById('regStudentName').value;
             const phone = document.getElementById('regPhone').value;
 
             try {
                 const dbRef = ref(db);
+                
+                // දැනට දත්ත ගබඩාවේ ඇති සිසුන්ගේ අංක පරීක්ෂා කර නව අංකය සෑදීම
                 const studentsSnapshot = await get(child(dbRef, `students`));
-                let isDuplicate = false;
+                let maxId = 0;
 
                 if (studentsSnapshot.exists()) {
                     studentsSnapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        if (data.student_id === studentId && data.institute === institute) {
-                            isDuplicate = true;
+                        if (data.student_id && data.student_id.startsWith("STU")) {
+                            // STU අකුරු ඉවත් කර ඉලක්කම පමණක් ගෙන පරීක්ෂා කිරීම
+                            let num = parseInt(data.student_id.replace("STU", ""), 10);
+                            if (!isNaN(num) && num > maxId) {
+                                maxId = num;
+                            }
                         }
                     });
                 }
+                
+                // නව ශිෂ්‍ය අංකය සෑදීම (උදා: STU0001, STU0015)
+                const generatedStudentId = "STU" + (maxId + 1).toString().padStart(4, '0');
 
-                if (isDuplicate) {
-                    alert("අවධානයයි: මෙම ආයතනය/කණ්ඩායම සඳහා මෙම ශිෂ්‍ය අංකය දැනටමත් භාවිතා කර ඇත!");
-                    btn.innerHTML = "ලියාපදිංචි කරන්න"; btn.disabled = false;
-                    return;
-                }
-
+                // දත්ත Database එකට යැවීම
                 const studentsRef = ref(db, 'students');
                 await push(studentsRef, {
-                    institute, grade, student_id: studentId, student_name: studentName, phone, reg_date: new Date().toLocaleDateString(), timestamp: Date.now()
+                    institute, 
+                    grade, 
+                    student_id: generatedStudentId, 
+                    student_name: studentName, 
+                    phone, 
+                    reg_date: new Date().toLocaleDateString(), 
+                    timestamp: Date.now()
                 });
 
-                alert("ශිෂ්‍යයා සාර්ථකව ලියාපදිංචි කරන ලදී!");
+                // ලියාපදිංචිය සාර්ථක වූ බව සහ නව අංකය දැනුම් දීම
+                alert(`ශිෂ්‍යයා සාර්ථකව ලියාපදිංචි කරන ලදී!\n\nඔබගේ ශිෂ්‍ය අංකය: ${generatedStudentId}`);
+                
                 document.getElementById('registrationForm').reset();
-            } catch (error) { alert("දෝෂයක් මතු විය!"); } 
-            finally { btn.innerHTML = "ලියාපදිංචි කරන්න"; btn.disabled = false; }
+            } catch (error) { 
+                console.error(error);
+                alert("දෝෂයක් මතු විය! අන්තර්ජාලය පරීක්ෂා කරන්න."); 
+            } 
+            finally { 
+                btn.innerHTML = "ලියාපදිංචි කරන්න"; 
+                btn.disabled = false; 
+            }
         });
 
+        // ලියාපදිංචි සිසුන්ගේ වාර්තා
         document.getElementById('loadStudentsBtn').addEventListener('click', async () => {
             const filterInst = document.getElementById('filterRegInstitute').value;
             const filterGrade = document.getElementById('filterRegGrade').value;
@@ -637,7 +653,7 @@
                     snapshot.forEach((child) => {
                         const data = child.val();
                         if ((filterInst === "All" || data.institute === filterInst) && data.month === filterMonth) {
-                            html += `<tr><td>${count++}</td><td>${data.date}</td><td>${data.institute}</td><td>${data.student_id}</td><td>${data.student_name}</td><td class="fw-bold">${data.amount.toFixed(2)}</td></tr>`;
+                            html += `<tr><td>${count++}</td><td>${data.date}</td><td>${data.institute}</td><td class="fw-bold">${data.student_id}</td><td>${data.student_name}</td><td class="fw-bold">${data.amount.toFixed(2)}</td></tr>`;
                             total += data.amount;
                         }
                     });
