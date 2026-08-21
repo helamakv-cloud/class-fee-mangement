@@ -7,7 +7,9 @@
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <!-- QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
         /* Print Styles */
         @media screen {
@@ -40,7 +42,7 @@
         .btn-reg { background: linear-gradient(135deg, #0dcaf0, #0bacce); color: white; }
         .btn-pay { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; }
         .btn-att { background: linear-gradient(135deg, #198754, #157347); color: white; }
-        .btn-rep { background: linear-gradient(135deg, #6f42c1, #59339d); color: white; } /* Reports Button */
+        .btn-rep { background: linear-gradient(135deg, #6f42c1, #59339d); color: white; } 
 
         /* Tabs Styling */
         .nav-tabs { border-bottom: none; justify-content: center; flex-wrap: nowrap; overflow-x: auto;}
@@ -82,6 +84,19 @@
                 width: 95%; margin: 0 auto;
             }
             .system-body { padding-bottom: 90px; } 
+        }
+
+        .summary-box {
+            background-color: #f8f9fa;
+            border: 2px solid #0d6efd;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        #qr-reader {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -126,7 +141,7 @@
     <!-- ===================== MAIN SYSTEM ===================== -->
     <div class="container-fluid mt-4 mb-5 system-body" id="mainSystem" style="display: none;">
         
-        <!-- Colorful Tabs -->
+        <!-- Tabs -->
         <ul class="nav nav-tabs mb-4" id="systemTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="registration-tab" data-bs-toggle="tab" data-bs-target="#registration" type="button" role="tab">ලියාපදිංචිය</button>
@@ -259,7 +274,7 @@
                 </div>
             </div>
 
-            <!-- 2. PAYMENT TAB -->
+            <!-- 2. PAYMENT TAB (Updated with QR and SMS) -->
             <div class="tab-pane fade" id="payment" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -292,15 +307,21 @@
                                             <option value="ICT" selected>ICT</option>
                                         </select>
                                     </div>
+                                    
+                                    <!-- QR Added Here -->
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
-                                        <input type="text" class="form-control" id="studentId" placeholder="උදා: STU0001" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control fw-bold" id="studentId" placeholder="STU0001" required>
+                                            <button class="btn btn-dark" type="button" onclick="openScanner('studentId', 'studentName')">📷 QR Scan</button>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">නම</label>
-                                        <input type="text" class="form-control" id="studentName" required>
+                                        <input type="text" class="form-control" id="studentName" required readonly placeholder="ID ලබා දුන් පසු නම පිරවේ">
                                     </div>
-                                    <div class="row">
+                                    
+                                    <div class="row align-items-center">
                                         <div class="col-6 mb-3">
                                             <label class="form-label fw-bold">මාසය</label>
                                             <input type="month" class="form-control" id="paymentMonth" required>
@@ -310,6 +331,15 @@
                                             <input type="number" class="form-control" id="amount" placeholder="1500" required>
                                         </div>
                                     </div>
+
+                                    <!-- Free Card Checkbox -->
+                                    <div class="form-check mb-3 bg-light p-2 rounded border border-success">
+                                        <input class="form-check-input ms-1 border-success" type="checkbox" id="isFreeCard" style="transform: scale(1.3);">
+                                        <label class="form-check-label text-success fw-bold ms-2" for="isFreeCard">
+                                            මෙම සිසුවාට Free Card එකක් ලබා දෙන්න
+                                        </label>
+                                    </div>
+
                                     <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold mt-2">ගෙවීම සටහන් කර බිල්පත මුද්‍රණය කරන්න</button>
                                 </form>
                             </div>
@@ -334,33 +364,51 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-2">
-                                        <label class="form-label fw-bold">මාසය:</label>
-                                        <input type="month" class="form-control" id="filterMonth">
+                                        <label class="form-label fw-bold">මාසය තෝරන්න:</label>
+                                        <input type="month" class="form-control border-success" id="filterMonth">
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <button id="loadDataBtn" class="btn btn-success w-100 fw-bold">වාර්තාව පෙන්වන්න</button>
                                     </div>
                                 </div>
-                                <div class="table-responsive">
+                                <div class="table-responsive mb-3">
                                     <table class="table table-bordered table-striped text-center">
                                         <thead class="table-dark">
-                                            <tr><th>#</th><th>දිනය</th><th>ආයතනය</th><th>ID</th><th>නම</th><th>මුදල (Rs.)</th></tr>
+                                            <tr><th>#</th><th>දිනය</th><th>ආයතනය</th><th>ID</th><th>නම</th><th>මුදල (Rs.) / තත්ත්වය</th></tr>
                                         </thead>
                                         <tbody id="reportTableBody">
                                             <tr><td colspan="6" class="text-muted">දත්ත බැලීම සඳහා ඉහතින් තෝරා "වාර්තාව පෙන්වන්න" ඔබන්න.</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="alert alert-success mt-3 text-end mb-0">
-                                    <h4 class="mb-0 fw-bold">මුළු එකතුව: Rs. <span id="totalAmountDisplay">0.00</span></h4>
+
+                                <!-- Net Pay Calculation Summary Box -->
+                                <div class="summary-box">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6 mb-3 mb-md-0 text-md-start text-center">
+                                            <label class="fw-bold mb-1">ආයතන ගාස්තුව (Commission):</label>
+                                            <select id="instituteFeePerc" class="form-select border-primary fw-bold w-75 mx-auto mx-md-0">
+                                                <option value="0">0% (ගාස්තු නැත)</option>
+                                                <option value="10">10% අඩු කරන්න</option>
+                                                <option value="20">20% අඩු කරන්න</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 text-md-end text-center">
+                                            <h5 class="mb-1 fw-bold text-secondary">මුළු එකතුව : Rs. <span id="totalAmountDisplay">0.00</span></h5>
+                                            <h6 class="mb-1 fw-bold text-danger">ආයතනයට (-) : Rs. <span id="instituteFeeDisplay">0.00</span></h6>
+                                            <hr class="my-1 border-primary">
+                                            <h3 class="mb-0 fw-bold text-primary">Net Pay : Rs. <span id="netPayDisplay">0.00</span></h3>
+                                        </div>
+                                    </div>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. ATTENDANCE TAB -->
+            <!-- 3. ATTENDANCE TAB (Updated with QR) -->
             <div class="tab-pane fade" id="attendance" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -391,14 +439,20 @@
                                         <label class="form-label fw-bold">දිනය</label>
                                         <input type="date" class="form-control" id="attDate" required>
                                     </div>
+                                    
+                                    <!-- QR Added Here -->
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
-                                        <input type="text" class="form-control" id="attStudentId" placeholder="උදා: STU0001" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control fw-bold" id="attStudentId" placeholder="STU0001" required>
+                                            <button class="btn btn-dark" type="button" onclick="openScanner('attStudentId', 'attStudentName')">📷 QR Scan</button>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">නම</label>
-                                        <input type="text" class="form-control" id="attStudentName" required>
+                                        <input type="text" class="form-control" id="attStudentName" required readonly placeholder="ID ලබා දුන් පසු නම පිරවේ">
                                     </div>
+
                                     <button type="submit" id="btnAttendance" class="btn btn-success w-100 fw-bold mt-2">පැමිණීම සටහන් කරන්න</button>
                                 </form>
                             </div>
@@ -454,17 +508,16 @@
                 </div>
             </div>
 
-            <!-- 4. STUDENT REPORTS TAB (NEW) -->
+            <!-- 4. STUDENT REPORTS TAB -->
             <div class="tab-pane fade" id="reports" role="tabpanel" tabindex="0">
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
-                        
-                        <!-- Search Box -->
                         <div class="card shadow-sm mb-4 border-secondary">
                             <div class="card-body bg-white text-center">
                                 <h4 class="fw-bold mb-3" style="color: #6f42c1;">ශිෂ්‍ය වාර්තා සෙවුම</h4>
                                 <div class="input-group" style="max-width: 500px; margin: 0 auto;">
-                                    <input type="text" id="searchStudentId" class="form-control form-control-lg text-center" placeholder="ශිෂ්‍ය අංකය ඇතුළත් කරන්න (උදා: STU0001)" required>
+                                    <input type="text" id="searchStudentId" class="form-control form-control-lg text-center fw-bold" placeholder="STU0001" required>
+                                    <button class="btn btn-dark px-3" type="button" onclick="openScanner('searchStudentId', null)">📷 Scan</button>
                                     <button class="btn text-white fw-bold px-4" type="button" id="searchReportBtn" style="background-color: #6f42c1;">සොයන්න</button>
                                 </div>
                             </div>
@@ -476,20 +529,13 @@
                                 සිසුවාගේ නම: <span id="reportStudentName" class="text-warning">දත්ත සොයන්න...</span>
                             </div>
                             <div class="card-body bg-white">
-                                
                                 <div class="row">
-                                    <!-- Payment History -->
                                     <div class="col-md-6 mb-4">
-                                        <h5 class="fw-bold text-primary mb-3"><i class="text-primary">💰</i> ගෙවීම් ඉතිහාසය (Payment History)</h5>
+                                        <h5 class="fw-bold text-primary mb-3"><i class="text-primary">💰</i> ගෙවීම් ඉතිහාසය</h5>
                                         <div class="table-responsive" style="max-height: 300px;">
                                             <table class="table table-bordered table-striped text-center text-sm">
                                                 <thead class="table-primary border-primary">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>මාසය</th>
-                                                        <th>ගෙවූ දිනය</th>
-                                                        <th>මුදල</th>
-                                                    </tr>
+                                                    <tr><th>#</th><th>මාසය</th><th>ගෙවූ දිනය</th><th>මුදල / තත්ත්වය</th></tr>
                                                 </thead>
                                                 <tbody id="studentPayTable">
                                                     <tr><td colspan="4" class="text-muted">තොරතුරු බැලීමට ඉහතින් Search කරන්න.</td></tr>
@@ -497,18 +543,12 @@
                                             </table>
                                         </div>
                                     </div>
-
-                                    <!-- Attendance History -->
                                     <div class="col-md-6 mb-4">
-                                        <h5 class="fw-bold text-success mb-3"><i class="text-success">✅</i> පැමිණීම් ඉතිහාසය (Attendance History)</h5>
+                                        <h5 class="fw-bold text-success mb-3"><i class="text-success">✅</i> පැමිණීම් ඉතිහාසය</h5>
                                         <div class="table-responsive" style="max-height: 300px;">
                                             <table class="table table-bordered table-striped text-center text-sm">
                                                 <thead class="table-success border-success">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>පැමිණි දිනය</th>
-                                                        <th>වේලාව</th>
-                                                    </tr>
+                                                    <tr><th>#</th><th>පැමිණි දිනය</th><th>වේලාව</th></tr>
                                                 </thead>
                                                 <tbody id="studentAttTable">
                                                     <tr><td colspan="3" class="text-muted">තොරතුරු බැලීමට ඉහතින් Search කරන්න.</td></tr>
@@ -517,15 +557,29 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
             
         </div>
+    </div>
+
+    <!-- QR Scanner Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title fw-bold" id="qrModalLabel">QR Code Scanner</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="stopScanner()"></button>
+          </div>
+          <div class="modal-body text-center">
+            <div id="qr-reader"></div>
+            <p class="text-muted mt-2 small">සිසුවාගේ QR කේතය කැමරාවට පෙන්වන්න.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Printable Receipt -->
@@ -542,7 +596,7 @@
                 <p class="mb-1"><strong>Teacher :</strong> <span id="r-teacher"></span></p>
                 <p class="mb-1"><strong>Subject :</strong> <span id="r-subject"></span></p>
                 <p class="mb-1"><strong>Month   :</strong> <span id="r-month"></span></p>
-                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount : Rs.<span id="r-amount"></span></strong></p>
+                <p class="mb-1 fs-5 fw-bold mt-2"><strong>Amount : <span id="r-amount"></span></strong></p>
             </div>
             
             <hr style="border-top: 1px dashed black;">
@@ -571,9 +625,18 @@
             document.getElementById('navHomeBtn').style.display = 'none';
             document.getElementById('homePage').style.display = 'block';
         }
+
+        document.getElementById('isFreeCard').addEventListener('change', function() {
+            const amountInput = document.getElementById('amount');
+            if (this.checked) {
+                amountInput.value = 0; amountInput.disabled = true;
+            } else {
+                amountInput.value = ''; amountInput.disabled = false;
+            }
+        });
     </script>
 
-    <!-- Firebase SDK & Logic -->
+    <!-- Firebase SDK & Core Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -585,22 +648,86 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        let currentTotalPayment = 0; 
         document.getElementById('attDate').valueAsDate = new Date();
-        document.getElementById('filterAttDate').valueAsDate = new Date();
 
-        window.deleteStudent = async function(key, name) {
-            if(confirm(`"${name}" සිසුවා පද්ධතියෙන් සම්පූර්ණයෙන්ම ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?`)) {
-                try {
-                    await remove(ref(db, `students/${key}`));
-                    alert("සිසුවා සාර්ථකව පද්ධතියෙන් ඉවත් කරන ලදී!");
-                    document.getElementById('loadStudentsBtn').click(); 
-                } catch(error) {
-                    alert("ඉවත් කිරීමේදී දෝෂයක් මතු විය!");
+        // ==========================================
+        // Auto Fetch Name Function
+        // ==========================================
+        window.fetchStudentNameAuto = async function(idField, nameField) {
+            const sid = document.getElementById(idField).value.trim().toUpperCase();
+            if(!sid || !nameField) return;
+
+            const nameInput = document.getElementById(nameField);
+            nameInput.value = "සොයමින් පවතී...";
+
+            try {
+                const snapshot = await get(child(ref(db), `students`));
+                let foundName = "";
+                if(snapshot.exists()) {
+                    snapshot.forEach(c => {
+                        if(c.val().student_id === sid) foundName = c.val().student_name;
+                    });
                 }
-            }
-        };
+                nameInput.value = foundName ? foundName : "ශිෂ්‍යයා හමු නොවීය!";
+            } catch(e) { nameInput.value = "දෝෂයකි!"; }
+        }
 
-        // 1. ශිෂ්‍ය ලියාපදිංචිය
+        // Trigger Auto-fetch on Manual Typing
+        document.getElementById('studentId').addEventListener('blur', () => fetchStudentNameAuto('studentId', 'studentName'));
+        document.getElementById('attStudentId').addEventListener('blur', () => fetchStudentNameAuto('attStudentId', 'attStudentName'));
+
+
+        // ==========================================
+        // QR Scanner Logic
+        // ==========================================
+        let html5QrcodeScanner = null;
+        let targetIdField = "";
+        let targetNameField = "";
+
+        window.openScanner = function(idField, nameField) {
+            targetIdField = idField;
+            targetNameField = nameField;
+            
+            var qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+            qrModal.show();
+
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById(targetIdField).value = decodedText.trim().toUpperCase();
+            stopScanner();
+            
+            var qrModal = bootstrap.Modal.getInstance(document.getElementById('qrModal'));
+            qrModal.hide();
+
+            // Auto fetch details after scanning
+            if(targetNameField) {
+                fetchStudentNameAuto(targetIdField, targetNameField);
+            } else if (targetIdField === 'searchStudentId') {
+                document.getElementById('searchReportBtn').click();
+            }
+        }
+
+        function onScanFailure(error) { /* Ignore background scanning errors */ }
+
+        window.stopScanner = function() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => { console.error("Failed to clear scanner.", error); });
+            }
+        }
+
+        // Fix Bootstrap Modal close behavior for scanner
+        document.getElementById('qrModal').addEventListener('hidden.bs.modal', function () { stopScanner(); });
+
+
+        // ==========================================
+        // Registration Logic
+        // ==========================================
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnRegister');
@@ -612,10 +739,8 @@
             const phone = document.getElementById('regPhone').value;
 
             try {
-                const dbRef = ref(db);
-                const studentsSnapshot = await get(child(dbRef, `students`));
+                const studentsSnapshot = await get(child(ref(db), `students`));
                 let maxId = 0;
-
                 if (studentsSnapshot.exists()) {
                     studentsSnapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
@@ -625,7 +750,6 @@
                         }
                     });
                 }
-                
                 const generatedStudentId = "STU" + (maxId + 1).toString().padStart(4, '0');
 
                 await push(ref(db, 'students'), {
@@ -635,12 +759,20 @@
                 alert(`ශිෂ්‍යයා සාර්ථකව ලියාපදිංචි කරන ලදී!\n\nඔබගේ ශිෂ්‍ය අංකය: ${generatedStudentId}`);
                 document.getElementById('registrationForm').reset();
                 document.getElementById('loadStudentsBtn').click();
-            } catch (error) { 
-                alert("දෝෂයක් මතු විය! අන්තර්ජාලය පරීක්ෂා කරන්න."); 
-            } finally { 
-                btn.innerHTML = "ලියාපදිංචි කරන්න"; btn.disabled = false; 
-            }
+            } catch (error) { alert("දෝෂයක් මතු විය!"); } 
+            finally { btn.innerHTML = "ලියාපදිංචි කරන්න"; btn.disabled = false; }
         });
+
+        // Load & Delete Students...
+        window.deleteStudent = async function(key, name) {
+            if(confirm(`"${name}" සිසුවා පද්ධතියෙන් සම්පූර්ණයෙන්ම ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?`)) {
+                try {
+                    await remove(ref(db, `students/${key}`));
+                    alert("සිසුවා සාර්ථකව ඉවත් කරන ලදී!");
+                    document.getElementById('loadStudentsBtn').click(); 
+                } catch(error) { alert("දෝෂයක් මතු විය!"); }
+            }
+        };
 
         document.getElementById('loadStudentsBtn').addEventListener('click', async () => {
             const filterInst = document.getElementById('filterRegInstitute').value;
@@ -657,16 +789,7 @@
                     snapshot.forEach((child) => {
                         const data = child.val();
                         if ((filterInst === "All" || data.institute === filterInst) && (filterGrade === "All" || data.grade === filterGrade)) {
-                            html += `
-                                <tr>
-                                    <td>${count++}</td>
-                                    <td>${data.institute}</td>
-                                    <td>${data.grade}</td>
-                                    <td class="fw-bold text-primary">${data.student_id}</td>
-                                    <td>${data.student_name}</td>
-                                    <td>${data.phone}</td>
-                                    <td><button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="deleteStudent('${child.key}', '${data.student_name}')">ඉවත් කරන්න</button></td>
-                                </tr>`;
+                            html += `<tr><td>${count++}</td><td>${data.institute}</td><td>${data.grade}</td><td class="fw-bold text-primary">${data.student_id}</td><td>${data.student_name}</td><td>${data.phone}</td><td><button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="deleteStudent('${child.key}', '${data.student_name}')">ඉවත් කරන්න</button></td></tr>`;
                         }
                     });
                     tableBody.innerHTML = count === 1 ? '<tr><td colspan="7" class="text-danger">දත්ත නොමැත.</td></tr>' : html;
@@ -675,7 +798,9 @@
             } catch (error) {}
         });
 
-        // 2. ගෙවීම්
+        // ==========================================
+        // Payment & SMS Logic
+        // ==========================================
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault(); 
             const btn = document.getElementById('submitBtn'); btn.disabled = true;
@@ -686,17 +811,18 @@
             const studentId = document.getElementById('studentId').value.toUpperCase();
             const studentName = document.getElementById('studentName').value;
             const paymentMonth = document.getElementById('paymentMonth').value;
-            const amount = parseFloat(document.getElementById('amount').value);
+            
+            const isFreeCard = document.getElementById('isFreeCard').checked;
+            const amount = isFreeCard ? 0 : parseFloat(document.getElementById('amount').value);
             
             const currentDate = new Date();
             const dateString = currentDate.toLocaleDateString();
             const timeString = currentDate.toLocaleTimeString();
 
             try {
-                const dbRef = ref(db);
-                const paymentsSnapshot = await get(child(dbRef, `payments`));
+                // Check duplicate
+                const paymentsSnapshot = await get(child(ref(db), `payments`));
                 let isDuplicate = false;
-
                 if (paymentsSnapshot.exists()) {
                     paymentsSnapshot.forEach((child) => {
                         const data = child.val();
@@ -709,8 +835,23 @@
                     btn.disabled = false; return; 
                 }
 
-                await push(ref(db, 'payments'), { institute, teacher: teacherName, subject: subjectName, student_id: studentId, student_name: studentName, month: paymentMonth, amount, date: dateString, time: timeString, timestamp: Date.now() });
+                // Get Student Phone for SMS/WhatsApp
+                let phone = "";
+                const stuSnap = await get(child(ref(db), `students`));
+                if(stuSnap.exists()){
+                    stuSnap.forEach(c => {
+                        if(c.val().student_id === studentId) phone = c.val().phone;
+                    });
+                }
+
+                await push(ref(db, 'payments'), { 
+                    institute, teacher: teacherName, subject: subjectName, 
+                    student_id: studentId, student_name: studentName, 
+                    month: paymentMonth, amount: amount, is_free: isFreeCard, 
+                    date: dateString, time: timeString, timestamp: Date.now() 
+                });
                 
+                // Print Receipt logic
                 document.getElementById('r-institute-name').innerText = institute;
                 document.getElementById('r-date').innerText = dateString + " " + timeString;
                 document.getElementById('r-studentid').innerText = studentId;
@@ -718,13 +859,35 @@
                 document.getElementById('r-teacher').innerText = teacherName;
                 document.getElementById('r-subject').innerText = subjectName;
                 document.getElementById('r-month').innerText = paymentMonth;
-                document.getElementById('r-amount').innerText = amount.toFixed(2);
+                document.getElementById('r-amount').innerText = isFreeCard ? "FREE CARD" : "Rs. " + amount.toFixed(2);
                 
                 window.print();
                 document.getElementById('paymentForm').reset();
+                document.getElementById('amount').disabled = false; 
+
+                // WhatsApp SMS Feature
+                if(phone && confirm("ගෙවීම සාර්ථකයි! WhatsApp මගින් බිල්පත (SMS) යැවීමට අවශ්‍යද?")) {
+                    let waPhone = phone.startsWith('0') ? '94' + phone.substring(1) : phone;
+                    let amountText = isFreeCard ? "FREE CARD" : "Rs. " + amount;
+                    let msg = `*Payment Successful!*\n\nStudent: ${studentName} (${studentId})\nSubject: ${subjectName}\nMonth: ${paymentMonth}\nAmount: ${amountText}\n\nThank you!\n- Class Fee Management System`;
+                    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                } else if(!phone) {
+                    alert("ගෙවීම සාර්ථකයි! නමුත් SMS යැවීමට සිසුවාගේ දුරකථන අංකය පද්ධතියේ සටහන් වී නැත.");
+                }
+
             } catch (error) { alert("දෝෂයක් මතු විය!"); } 
             finally { btn.disabled = false; }
         });
+
+        // Net Pay and Load Payments
+        function calculateNetPay() {
+            const perc = parseFloat(document.getElementById('instituteFeePerc').value);
+            const instFee = currentTotalPayment * (perc / 100);
+            const netPay = currentTotalPayment - instFee;
+            document.getElementById('instituteFeeDisplay').innerText = instFee.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('netPayDisplay').innerText = netPay.toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+        document.getElementById('instituteFeePerc').addEventListener('change', calculateNetPay);
 
         document.getElementById('loadDataBtn').addEventListener('click', async () => {
             const filterInst = document.getElementById('filterInstitute').value;
@@ -742,17 +905,25 @@
                     snapshot.forEach((child) => {
                         const data = child.val();
                         if ((filterInst === "All" || data.institute === filterInst) && data.month === filterMonth) {
-                            html += `<tr><td>${count++}</td><td>${data.date}</td><td>${data.institute}</td><td class="fw-bold">${data.student_id}</td><td>${data.student_name}</td><td class="fw-bold">${data.amount.toFixed(2)}</td></tr>`;
-                            total += data.amount;
+                            let amountDisplay = data.is_free ? '<span class="badge bg-success">Free Card</span>' : `Rs. ${data.amount.toFixed(2)}`;
+                            html += `<tr><td>${count++}</td><td>${data.date}</td><td>${data.institute}</td><td class="fw-bold">${data.student_id}</td><td>${data.student_name}</td><td class="fw-bold">${amountDisplay}</td></tr>`;
+                            total += (data.is_free ? 0 : parseFloat(data.amount));
                         }
                     });
                     tableBody.innerHTML = count === 1 ? '<tr><td colspan="6" class="text-danger">දත්ත නොමැත.</td></tr>' : html;
+                    currentTotalPayment = total;
                     totalDisplay.innerText = total.toLocaleString('en-US', {minimumFractionDigits: 2});
-                } else { tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත නොමැත.</td></tr>'; }
+                    calculateNetPay(); 
+                } else { 
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-danger">දත්ත නොමැත.</td></tr>'; 
+                    currentTotalPayment = 0; totalDisplay.innerText = "0.00"; calculateNetPay();
+                }
             } catch (e) {}
         });
 
-        // 3. පැමිණීම් 
+        // ==========================================
+        // Attendance Logic
+        // ==========================================
         document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnAttendance'); btn.disabled = true;
@@ -765,10 +936,13 @@
 
             try {
                 await push(ref(db, 'attendance'), { institute, subject, date, student_id: studentId, student_name: studentName, time: new Date().toLocaleTimeString(), timestamp: Date.now() });
-                alert("පැමිණීම සටහන් කරන ලදී!");
+                
+                // Show floating success message instead of block alert for speed during scanning
+                alert("✅ පැමිණීම සටහන් කරන ලදී: " + studentName);
+                
                 document.getElementById('attStudentId').value = '';
                 document.getElementById('attStudentName').value = '';
-                document.getElementById('attStudentId').focus();
+                document.getElementById('attStudentId').focus(); // Ready for next scan/type
             } catch (e) {} finally { btn.disabled = false; }
         });
 
@@ -798,13 +972,12 @@
             } catch (e) {}
         });
 
-        // 4. ශිෂ්‍ය වාර්තා සෙවීම (Student Individual Reports)
+        // ==========================================
+        // Student Reports Logic
+        // ==========================================
         document.getElementById('searchReportBtn').addEventListener('click', async () => {
             const sid = document.getElementById('searchStudentId').value.trim().toUpperCase();
-            if(!sid) {
-                alert("කරුණාකර ශිෂ්‍ය අංකය ලබා දෙන්න!"); 
-                return;
-            }
+            if(!sid) { alert("කරුණාකර ශිෂ්‍ය අංකය ලබා දෙන්න!"); return; }
 
             const btn = document.getElementById('searchReportBtn');
             btn.innerHTML = "සොයමින්..."; btn.disabled = true;
@@ -819,31 +992,26 @@
 
             try {
                 const dbRef = ref(db);
-
-                // සිසුවාගේ නම සෙවීම
                 const stuSnap = await get(child(dbRef, 'students'));
                 let sName = "නොදන්නා සිසුවෙකි";
                 if(stuSnap.exists()){
-                    stuSnap.forEach(c => {
-                        if(c.val().student_id === sid) sName = c.val().student_name;
-                    });
+                    stuSnap.forEach(c => { if(c.val().student_id === sid) sName = c.val().student_name; });
                 }
                 nameDisplay.innerText = `${sName} (${sid})`;
 
-                // ගෙවීම් සෙවීම
                 const paySnap = await get(child(dbRef, 'payments'));
                 let payHtml = ""; let pCount = 1;
                 if(paySnap.exists()){
                     paySnap.forEach(c => {
                         let d = c.val();
                         if(d.student_id === sid){
-                            payHtml += `<tr><td>${pCount++}</td><td class="fw-bold">${d.month}</td><td>${d.date}</td><td class="text-primary fw-bold">Rs. ${d.amount.toFixed(2)}</td></tr>`;
+                            let amountDisplay = d.is_free ? '<span class="badge bg-success">Free Card</span>' : `Rs. ${d.amount.toFixed(2)}`;
+                            payHtml += `<tr><td>${pCount++}</td><td class="fw-bold">${d.month}</td><td>${d.date}</td><td class="text-primary fw-bold">${amountDisplay}</td></tr>`;
                         }
                     });
                 }
-                payTable.innerHTML = pCount > 1 ? payHtml : '<tr><td colspan="4" class="text-danger">මෙම සිසුවාට අදාළ ගෙවීම් වාර්තා නොමැත.</td></tr>';
+                payTable.innerHTML = pCount > 1 ? payHtml : '<tr><td colspan="4" class="text-danger">ගෙවීම් වාර්තා නොමැත.</td></tr>';
 
-                // පැමිණීම් සෙවීම
                 const attSnap = await get(child(dbRef, 'attendance'));
                 let attHtml = ""; let aCount = 1;
                 if(attSnap.exists()){
@@ -854,13 +1022,10 @@
                         }
                     });
                 }
-                attTable.innerHTML = aCount > 1 ? attHtml : '<tr><td colspan="3" class="text-danger">මෙම සිසුවාට අදාළ පැමිණීම් වාර්තා නොමැත.</td></tr>';
+                attTable.innerHTML = aCount > 1 ? attHtml : '<tr><td colspan="3" class="text-danger">පැමිණීම් වාර්තා නොමැත.</td></tr>';
 
-            } catch(e) {
-                alert("දත්ත ලබාගැනීමේදී දෝෂයක් මතු විය!");
-            } finally {
-                btn.innerHTML = "සොයන්න"; btn.disabled = false;
-            }
+            } catch(e) { alert("දෝෂයක් මතු විය!"); } 
+            finally { btn.innerHTML = "සොයන්න"; btn.disabled = false; }
         });
 
     </script>
