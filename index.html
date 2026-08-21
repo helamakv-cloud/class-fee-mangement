@@ -27,7 +27,21 @@
         
         .table-responsive { max-height: 400px; overflow-y: auto; }
 
-        /* Attractive Colorful Tabs Styling */
+        /* Home Page Buttons Styling */
+        .home-btn {
+            border-radius: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+        .home-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+        }
+        .btn-reg { background: linear-gradient(135deg, #0dcaf0, #0bacce); color: white; }
+        .btn-pay { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; }
+        .btn-att { background: linear-gradient(135deg, #198754, #157347); color: white; }
+
+        /* Tabs Styling */
         .nav-tabs { border-bottom: none; justify-content: center; }
         .nav-tabs .nav-link {
             border-radius: 30px;
@@ -36,44 +50,32 @@
             font-weight: bold;
             transition: all 0.3s ease;
         }
-        /* Registration Tab (Info) */
         #registration-tab { color: #0dcaf0; border-color: #0dcaf0; background: white; }
         #registration-tab.active { background-color: #0dcaf0; color: white; box-shadow: 0 4px 10px rgba(13, 202, 240, 0.4); }
         
-        /* Payment Tab (Primary) */
         #payment-tab { color: #0d6efd; border-color: #0d6efd; background: white; }
         #payment-tab.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); }
         
-        /* Attendance Tab (Success) */
         #attendance-tab { color: #198754; border-color: #198754; background: white; }
         #attendance-tab.active { background-color: #198754; color: white; box-shadow: 0 4px 10px rgba(25, 135, 84, 0.4); }
 
-        /* Mobile Bottom Navigation Layout */
+        /* Mobile Bottom Navigation Layout for inner system */
         @media (max-width: 768px) {
             #systemTabs {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: #ffffff;
-                z-index: 1000;
+                position: fixed; bottom: 0; left: 0; right: 0;
+                background: #ffffff; z-index: 1000;
                 margin-bottom: 0 !important;
                 padding: 12px 10px 20px 10px;
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-                display: flex;
-                justify-content: space-between;
-                border-top-left-radius: 25px;
-                border-top-right-radius: 25px;
+                display: flex; justify-content: space-between;
+                border-top-left-radius: 25px; border-top-right-radius: 25px;
             }
             #systemTabs .nav-item { flex: 1; text-align: center; }
             #systemTabs .nav-link {
-                font-size: 13px;
-                padding: 10px 5px;
-                border-radius: 20px;
-                width: 95%;
-                margin: 0 auto;
+                font-size: 13px; padding: 10px 5px; border-radius: 20px;
+                width: 95%; margin: 0 auto;
             }
-            body { padding-bottom: 90px; } /* Prevent content from hiding behind bottom nav */
+            .system-body { padding-bottom: 90px; } 
         }
     </style>
 </head>
@@ -81,12 +83,41 @@
 
     <!-- Navigation Bar -->
     <nav class="navbar navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Class Fee Management</span>
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <span class="navbar-brand mb-0 h1 fw-bold">Class Fee Management</span>
+            <!-- Home Button (Hidden on Home Page initially) -->
+            <button id="navHomeBtn" class="btn btn-light btn-sm fw-bold text-primary" style="display: none;" onclick="goHome()">🏠 Home</button>
         </div>
     </nav>
 
-    <div class="container-fluid mt-4 mb-5" id="main-content">
+    <!-- ===================== HOME PAGE ===================== -->
+    <div id="homePage" class="container mt-5">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-primary mb-3">Welcome to</h1>
+            <h2 class="fw-bold text-dark">Class Fee Management System</h2>
+            <p class="text-muted">කරුණාකර ඔබට අවශ්‍ය අංශය තෝරන්න</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
+                <!-- Buttons stack vertically neatly on mobile -->
+                <div class="d-grid gap-4">
+                    <button onclick="openSystem('registration')" class="btn btn-reg home-btn py-4 fs-3 shadow">
+                        📝 ලියාපදිංචිය
+                    </button>
+                    <button onclick="openSystem('payment')" class="btn btn-pay home-btn py-4 fs-3 shadow">
+                        💰 ගෙවීම්
+                    </button>
+                    <button onclick="openSystem('attendance')" class="btn btn-att home-btn py-4 fs-3 shadow">
+                        ✅ පැමිණීම
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN SYSTEM ===================== -->
+    <div class="container-fluid mt-4 mb-5 system-body" id="mainSystem" style="display: none;">
         
         <!-- Colorful Tabs -->
         <ul class="nav nav-tabs mb-4" id="systemTabs" role="tablist">
@@ -103,7 +134,7 @@
 
         <div class="tab-content" id="myTabContent">
             
-            <!-- ===================== REGISTRATION TAB ===================== -->
+            <!-- REGISTRATION TAB -->
             <div class="tab-pane fade show active" id="registration" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -210,7 +241,7 @@
                 </div>
             </div>
 
-            <!-- ===================== PAYMENT TAB ===================== -->
+            <!-- PAYMENT TAB -->
             <div class="tab-pane fade" id="payment" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -231,21 +262,18 @@
                                             <option value="Hingurukaduwa Group 3">Hingurukaduwa Group 3</option>
                                         </select>
                                     </div>
-                                    
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ගුරුවරයා</label>
                                         <select class="form-select bg-light text-primary fw-bold" id="teacherName" required>
                                             <option value="කැලුම් කෝණාර" selected>කැලුම් කෝණාර</option>
                                         </select>
                                     </div>
-                                    
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">විෂය</label>
                                         <select class="form-select bg-light text-primary fw-bold" id="subjectName" required>
                                             <option value="ICT" selected>ICT</option>
                                         </select>
                                     </div>
-                                    
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">ශිෂ්‍ය අංකය (ID)</label>
                                         <input type="text" class="form-control" id="studentId" placeholder="උදා: STU001" required>
@@ -314,7 +342,7 @@
                 </div>
             </div>
 
-            <!-- ===================== ATTENDANCE TAB ===================== -->
+            <!-- ATTENDANCE TAB -->
             <div class="tab-pane fade" id="attendance" role="tabpanel" tabindex="0">
                 <div class="row">
                     <div class="col-lg-4 mb-4">
@@ -437,7 +465,29 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase SDK & Logic (කලින් තිබූ Firebase Javascript Logic එක මෙතනින් පහළ එලෙසම භාවිතා වේ) -->
+    <!-- Navigation & UI Logic -->
+    <script>
+        function openSystem(tabName) {
+            // Hide Home, Show System
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('mainSystem').style.display = 'block';
+            document.getElementById('navHomeBtn').style.display = 'block';
+
+            // Trigger the correct tab
+            let triggerEl = document.querySelector('#' + tabName + '-tab');
+            let tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+        }
+
+        function goHome() {
+            // Hide System, Show Home
+            document.getElementById('mainSystem').style.display = 'none';
+            document.getElementById('navHomeBtn').style.display = 'none';
+            document.getElementById('homePage').style.display = 'block';
+        }
+    </script>
+
+    <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
