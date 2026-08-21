@@ -543,6 +543,16 @@
                                 Student Name: <span id="reportStudentName" class="text-warning fw-normal">Search to view...</span>
                             </div>
                             <div class="card-body bg-white">
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-2">
+                                       <label class="form-label fw-bold text-primary">Filter By Month (Optional)</label>
+                                       <input type="month" class="form-control border-primary" id="reportFilterMonth">
+                                    </div>
+                                    <div class="col-md-6 mb-2 d-flex align-items-end">
+                                        <button class="btn btn-outline-primary w-100 fw-bold" onclick="filterStudentReports()">Filter Reports</button>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
                                         <h6 class="fw-bold text-primary mb-3"><i class="text-primary">💰</i> Payment History</h6>
@@ -776,7 +786,9 @@
                     institute, grade, student_id: studentId, student_name: studentName, phone, reg_date: new Date().toLocaleDateString(), timestamp: Date.now()
                 });
 
-                alert(`Student successfully registered!\n\nStudent ID: ${studentId}`);
+                alert(`Student successfully registered!
+
+Student ID: ${studentId}`);
                 document.getElementById('registrationForm').reset();
                 document.getElementById('loadStudentsBtn').click();
             } catch (error) { alert("An error occurred. Check your internet connection."); } 
@@ -888,7 +900,15 @@
                 if(phone && confirm("Payment saved! Do you want to send the receipt via WhatsApp?")) {
                     let waPhone = phone.startsWith('0') ? '94' + phone.substring(1) : phone;
                     let amountText = isFreeCard ? "FREE CARD" : "Rs. " + amount;
-                    let msg = `*Payment Successful!*\n\nStudent: ${studentName} (${studentId})\nSubject: ${subjectName}\nMonth: ${paymentMonth}\nAmount: ${amountText}\n\nThank you!\n- Class Fee Management System`;
+                    let msg = `*Payment Successful!*
+
+Student: ${studentName} (${studentId})
+Subject: ${subjectName}
+Month: ${paymentMonth}
+Amount: ${amountText}
+
+Thank you!
+- Class Fee Management System`;
                     window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                 } else if(!phone) {
                     alert("Payment saved! Note: Phone number not found for SMS.");
@@ -993,6 +1013,9 @@
         // ==========================================
         // Student Reports Logic
         // ==========================================
+        
+        let currentReportStudentId = ""; // Track current student for filtering
+        
         document.getElementById('searchReportBtn').addEventListener('click', async () => {
             const sid = document.getElementById('searchStudentId').value.trim().toUpperCase();
             if(!sid) { alert("Please enter Student ID!"); return; }
@@ -1007,6 +1030,9 @@
             nameDisplay.innerText = "Searching data...";
             payTable.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
             attTable.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+            
+            currentReportStudentId = sid;
+            document.getElementById('reportFilterMonth').value = ""; // Reset filter
 
             try {
                 const dbRef = ref(db);
@@ -1017,14 +1043,38 @@
                 }
                 nameDisplay.innerText = `${sName} (${sid})`;
 
+                // Load Initial Data (All months)
+                loadFilteredReports(sid, "");
+
+            } catch(e) { alert("An error occurred!"); } 
+            finally { btn.innerHTML = "Search"; btn.disabled = false; }
+        });
+        
+        window.filterStudentReports = function() {
+            if(!currentReportStudentId) {
+                alert("Please search for a student first.");
+                return;
+            }
+            const filterMonth = document.getElementById('reportFilterMonth').value;
+            loadFilteredReports(currentReportStudentId, filterMonth);
+        }
+        
+        async function loadFilteredReports(sid, filterMonth) {
+             const payTable = document.getElementById('studentPayTable');
+             const attTable = document.getElementById('studentAttTable');
+             
+             try {
+                const dbRef = ref(db);
                 const paySnap = await get(child(dbRef, 'payments'));
                 let payHtml = ""; let pCount = 1;
                 if(paySnap.exists()){
                     paySnap.forEach(c => {
                         let d = c.val();
                         if(d.student_id === sid){
-                            let amountDisplay = d.is_free ? '<span class="badge bg-success">Free Card</span>' : `Rs. ${d.amount.toFixed(2)}`;
-                            payHtml += `<tr><td>${pCount++}</td><td class="fw-bold">${d.month}</td><td>${d.date}</td><td class="text-primary fw-bold">${amountDisplay}</td></tr>`;
+                            if(!filterMonth || d.month === filterMonth) {
+                                let amountDisplay = d.is_free ? '<span class="badge bg-success">Free Card</span>' : `Rs. ${d.amount.toFixed(2)}`;
+                                payHtml += `<tr><td>${pCount++}</td><td class="fw-bold">${d.month}</td><td>${d.date}</td><td class="text-primary fw-bold">${amountDisplay}</td></tr>`;
+                            }
                         }
                     });
                 }
@@ -1036,15 +1086,28 @@
                     attSnap.forEach(c => {
                         let d = c.val();
                         if(d.student_id === sid){
-                            attHtml += `<tr><td>${aCount++}</td><td class="fw-bold">${d.date}</td><td>${d.time}</td></tr>`;
+                            // If filtering by month, check if attendance date is in that month
+                            let matchMonth = true;
+                            if(filterMonth) {
+                                // Extract YYYY-MM from attendance date (YYYY-MM-DD)
+                                const attMonth = d.date.substring(0, 7);
+                                if(attMonth !== filterMonth) matchMonth = false;
+                            }
+                            
+                            if(matchMonth) {
+                                attHtml += `<tr><td>${aCount++}</td><td class="fw-bold">${d.date}</td><td>${d.time}</td></tr>`;
+                            }
                         }
                     });
                 }
                 attTable.innerHTML = aCount > 1 ? attHtml : '<tr><td colspan="3" class="text-danger small">No attendance records found.</td></tr>';
 
-            } catch(e) { alert("An error occurred!"); } 
-            finally { btn.innerHTML = "Search"; btn.disabled = false; }
-        });
+             } catch(e) {
+                 console.error(e);
+                 payTable.innerHTML = '<tr><td colspan="4" class="text-danger small">Error loading data.</td></tr>';
+                 attTable.innerHTML = '<tr><td colspan="3" class="text-danger small">Error loading data.</td></tr>';
+             }
+        }
 
     </script>
 </body>
